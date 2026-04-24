@@ -227,15 +227,14 @@ module barre() {
                   wire_channel_w,
                   wire_channel_d + EPS]);
 
-        // --- Wire channel: slot through front face (Y=0) of far end block ---
-        // Opens at the front face near Z=0, below the visible side face.
-        // Cable exits the hollow pocket through this slot and routes along
-        // the outside front edge — avoids the base-contact face (Z=0 bottom)
-        // which would crush a wire in a bottom groove.
-        translate([jack_pocket_x_center - wire_channel_w / 2, -EPS, -EPS])
-            cube([wire_channel_w,
+        // --- Wire channel: groove on user-facing face (Y=0), running X- to X+ ---
+        // Sits at the bottom front edge of the far end block — hidden by the
+        // base when mounted, visible only from below. Depth = cavity_wall_y
+        // so it opens into the hollow pocket at the far end.
+        translate([middle_x_end, -EPS, -EPS])
+            cube([cavity_x_min + cavity_x_span - middle_x_end,
                   cavity_wall_y + EPS,
-                  wire_channel_d * 2 + EPS]);
+                  wire_channel_w + EPS]);
     }
 }
 
