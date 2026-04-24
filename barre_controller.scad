@@ -1,26 +1,30 @@
 /* ============================================================
  *  Parametric Barre Controller v4
  *  ------------------------------------------------------------
- *  Leaf-spring flex-beam barres with top-mounted 3.5 mm jacks
+ *  Leaf-spring flex-beam barres with side-mounted 3.5 mm jacks
  *  (sized for Thonk PJ398SM / Thonkiconn) for Eurorack-style
  *  patching.
  *
  *  A single continuous rail runs across the base. Each barre
  *  has a matching notch on the underside of its far end block
  *  that drops over the rail, providing lateral alignment. Two
- *  screws per barre clamp it down — the far screw passes
- *  through the notch and rail into the base.
+ *  screws per barre clamp it down.
  *
  *  === Barre side profile (along X) ===
  *
- *   Z=end_thickness ┬───────────────┬──────────────┬──────┐
- *                   │ near          │              │     ⊓│ ← jack plug
- *                   │ end  ┌────────┴──────────┐   │ jack │   points up
- *                   │ block│ middle flex (thin)│   │ block│
- *                   │      └───────────────────┘   │      │
- *                   │  ↑screw   ↑piezo  ↑far screw│      │
- *   Z=0  ───────────┴────────────────────┬──┬─────┴──────┘
- *                                        notch └─ rail on base
+ *   Z=end_thickness ┬───────────────┬──────────────┬──────────┐
+ *                   │ near          │              │ jack     │
+ *                   │ end  ┌────────┴──────────┐   │ block    │─┤← plug (Y=0)
+ *                   │ block│ middle flex (thin)│   │ [hollow] │
+ *                   │      └───────────────────┘   │ back open│
+ *                   │  ↑screw   ↑piezo             │ ↑screw   │
+ *   Z=0  ───────────┴──────────────────┬──┬─────────┴──────────┘
+ *                                      notch└─ rail on base
+ *
+ *  Jack orientation: plug faces the user (Y=0 face). The body
+ *  sits in a hollow cavity open at the back face (Y=barre_width),
+ *  giving access to the solder lugs and cable routing.
+ *  The far screw clamps in front of (+X of) the jack.
  *
  *  The middle's bottom sits (end_thickness - middle_thickness)
  *  above the base, giving a natural flex gap so the middle can
@@ -31,8 +35,6 @@
  *  • Barre: print UPSIDE DOWN (flat top face on the bed). Every
  *    cutout (piezo indent, wire channel, jack pocket, notch)
  *    opens upward during printing — clean buckets and grooves.
- *    Only notable bridge is the floor of the jack pocket
- *    (~10 mm circular span), which FDM handles fine.
  *
  *  License: public domain / CC0
  * ============================================================ */
@@ -45,15 +47,15 @@ num_barres  = 4;
 barre_pitch = 28;   // Y centre-to-centre between barres
 
 /* [Barre Geometry] */
-barre_length     = 80;
+barre_length     = 87;
 barre_width      = 20;
-// End blocks must fit the vertical jack pocket (pocket depth +
-// plug hole shoulder). 14 mm fits a PJ398SM with margin.
+// End blocks must be wide enough (Y) for the horizontal jack body.
+// 14 mm fits a PJ398SM with margin in the Z direction.
 end_thickness    = 14;
 // Thin flex middle. Smaller = more flex = more piezo signal.
 middle_thickness = 4;
 end_length_near  = 15;
-end_length_far   = 22;
+end_length_far   = 29;
 
 /* [Screws] */
 screw_clearance_d = 3.4;   // M3 through-hole
@@ -64,18 +66,16 @@ piezo_d                = 20;
 piezo_indent_clearance = 0.4;
 piezo_indent_depth     = 0.8;
 
-/* [Thonk Jack — 3.5 mm TS, top-mounted] */
+/* [Thonk Jack — 3.5 mm TS, side-mounted] */
 // Sized for PJ398SM ("Thonkiconn") panel jack. Plug inserts
-// from above for Eurorack-style patching.
+// from the user-facing (Y=0) side. Body sits in a hollow cavity
+// accessible from the back face (Y=barre_width).
 jack_plug_hole_d     = 6.2;   // for 6 mm threaded barrel
-jack_cavity_d        = 12;    // hollow top cavity diameter for jack body
-jack_cavity_depth    = 8;     // hollow top cavity depth
+jack_plug_hole_wall  = 2.0;   // front wall thickness (where the nut clamps)
 jack_pocket_d        = 10;    // body pocket diameter (~9 mm body + clearance)
-jack_pocket_depth    = 11;    // body pocket depth
 // Jack position: distance from the barre's +X face to pocket centre.
-// Keeps the +X portion of the far block for the jack and leaves
-// the -X portion for the notch + screw.
-jack_offset_from_end = 7;
+// Screw sits in front of the jack (+X), so leave enough room.
+jack_offset_from_end = 14;
 
 /* [Wire Channel] */
 // Grooves on the underside of the middle (up into it) and the
@@ -124,8 +124,7 @@ notch_width      = rail_width  + 2 * notch_clearance;
 notch_depth      = rail_height + notch_clearance;
 
 jack_pocket_x_center = barre_length - jack_offset_from_end;
-pocket_top_z         = end_thickness - jack_plug_hole_wall;
-pocket_bot_z         = pocket_top_z - jack_pocket_depth;
+jack_z_center        = end_thickness / 2;   // jack axis height in the end block
 
 near_screw_x     = end_length_near / 2;
 // Far screw sits just in front of the jack pocket (toward +X), centred in Y.
@@ -191,27 +190,20 @@ module barre() {
             cylinder(d = piezo_d + piezo_indent_clearance,
                      h = piezo_indent_depth + EPS);
 
-        // --- Jack pocket: open on BOTTOM so jack inserts from below.
-        // The threaded barrel passes up through the plug hole; the nut
-        // clamps on the top shoulder. The body hangs below the barre.
-        // Full-depth cut (Z=0 to pocket_top_z) leaves only the thin
-        // top shoulder with the plug hole through it.
-        translate([jack_pocket_x_center, barre_width / 2, -EPS])
-            cylinder(d = jack_pocket_d,
-                     h = pocket_top_z + EPS);
-        // Plug hole through top shoulder (for the threaded barrel)
-        translate([jack_pocket_x_center, barre_width / 2,
-                   pocket_top_z - EPS])
-            cylinder(d = jack_plug_hole_d,
-                     h = jack_plug_hole_wall + 2 * EPS);
-
-        // --- Hollow top cavity for jack mounting and cable routing ---
-        // Creates space at the top of the far end block for the jack body
-        // and allows cable paths to route back toward the piezo.
-        translate([jack_pocket_x_center, barre_width / 2,
-                   end_thickness - jack_cavity_depth])
-            cylinder(d = jack_cavity_d,
-                     h = jack_cavity_depth + EPS);
+        // --- Horizontal Thonk jack ---
+        // Plug hole through the user-facing (Y=0) front wall.
+        // Threaded barrel protrudes out the front; nut clamps on the inside.
+        translate([jack_pocket_x_center, -EPS, jack_z_center])
+            rotate([-90, 0, 0])
+                cylinder(d = jack_plug_hole_d,
+                         h = jack_plug_hole_wall + EPS);
+        // Body cavity: hollow from the back face (Y=barre_width), away from user.
+        // Depth = barre_width - jack_plug_hole_wall so it meets the plug hole wall.
+        // Jack body and solder lugs live here; cables route out the back opening.
+        translate([jack_pocket_x_center, barre_width + EPS, jack_z_center])
+            rotate([90, 0, 0])
+                cylinder(d = jack_pocket_d,
+                         h = barre_width - jack_plug_hole_wall + EPS);
 
         // --- Notch on underside of far block (mates with rail) ---
         translate([notch_x_center - notch_width / 2, -EPS, -EPS])
@@ -229,13 +221,12 @@ module barre() {
                   wire_channel_d + EPS]);
 
         // --- Wire channel: far block's underside groove ---
-        // Runs from the middle/far boundary to the jack pocket opening.
-        // Since the pocket is open on the bottom, wires pass straight
-        // into the pocket body from this groove.
+        // Runs from the middle/far boundary to below the jack cavity.
+        // Cable exits here, bends up, and enters the back cavity to reach the lugs.
         translate([middle_x_end,
                    (barre_width - wire_channel_w) / 2,
                    -EPS])
-            cube([jack_pocket_x_center - jack_pocket_d / 2 - middle_x_end,
+            cube([jack_pocket_x_center - middle_x_end,
                   wire_channel_w,
                   wire_channel_d + EPS]);
     }
