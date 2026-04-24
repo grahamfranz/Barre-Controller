@@ -76,11 +76,10 @@ jack_pocket_depth    = 11;    // body pocket depth
 jack_offset_from_end = 14;
 
 /* [Hollow Cavity] */
-// Rectangular cutout in the far end block for jack body clearance.
-// Open on both front (Y=0) and back (Y=barre_width) — just a tunnel
-// in Y with a floor and top wall around the jack.
-cavity_floor_thickness = 2;   // thickness of solid floor at bottom (Z)
-cavity_top_wall        = 2;   // thickness of solid wall at top (above jack shoulder)
+// Top-down pocket in the far end block. Open at the top (Z+) so
+// the jack drops in from above. All four side walls stay solid.
+cavity_floor_z   = 3;    // Z height of the pocket floor
+cavity_wall_y    = 3;    // thickness of front/back walls (Y sides)
 
 /* [Wire Channel] */
 // Grooves on the underside of the middle (up into it) and the
@@ -129,12 +128,10 @@ notch_width      = rail_width  + 2 * notch_clearance;
 notch_depth      = rail_height + notch_clearance;
 
 jack_pocket_x_center = barre_length - jack_offset_from_end;
-pocket_top_z         = end_thickness - jack_plug_hole_wall;
-pocket_bot_z         = pocket_top_z - jack_pocket_depth;
 
-cavity_height        = end_thickness - cavity_floor_thickness - cavity_top_wall;
-cavity_x_span        = jack_pocket_d + 3;  // width to cover jack pocket + margin
+cavity_x_span        = jack_pocket_d + 3;   // X extent (jack body + cable margin)
 cavity_x_min         = jack_pocket_x_center - cavity_x_span / 2;
+cavity_y_inner       = barre_width - 2 * cavity_wall_y;  // pocket width in Y
 
 near_screw_x     = end_length_near / 2;
 // Far screw sits just in front of the jack pocket (toward +X), centred in Y.
@@ -200,22 +197,19 @@ module barre() {
             cylinder(d = piezo_d + piezo_indent_clearance,
                      h = piezo_indent_depth + EPS);
 
-        // --- Jack pocket: vertical, open at bottom ---
-        // Body pocket from Z=0 up to pocket_top_z, leaving a shoulder.
-        translate([jack_pocket_x_center, barre_width / 2, -EPS])
-            cylinder(d = jack_pocket_d,
-                     h = pocket_top_z + EPS);
-        // Plug hole through the top shoulder (for threaded barrel)
+        // --- Jack barrel hole through top surface ---
+        // Small hole for the threaded barrel; nut clamps on top face.
         translate([jack_pocket_x_center, barre_width / 2,
-                   pocket_top_z - EPS])
+                   cavity_floor_z - EPS])
             cylinder(d = jack_plug_hole_d,
-                     h = jack_plug_hole_wall + 2 * EPS);
+                     h = end_thickness - cavity_floor_z + 2 * EPS);
 
-        // --- Hollow cavity in far end block ---
-        // Tunnel in Y (open front and back) — just floor and top remain.
-        // Jack body sits inside; cable routes through freely.
-        translate([cavity_x_min, -EPS, cavity_floor_thickness])
-            cube([cavity_x_span, barre_width + 2 * EPS, cavity_height]);
+        // --- Top-down pocket for jack body and cable routing ---
+        // Open at the top (Z=end_thickness). All four side walls remain
+        // solid — nothing visible from the front, back, or sides.
+        translate([cavity_x_min, cavity_wall_y, cavity_floor_z])
+            cube([cavity_x_span, cavity_y_inner,
+                  end_thickness - cavity_floor_z + EPS]);
 
         // --- Notch on underside of far block (mates with rail) ---
         translate([notch_x_center - notch_width / 2, -EPS, -EPS])
