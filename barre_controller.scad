@@ -227,11 +227,11 @@ module barre() {
                   wire_channel_w,
                   wire_channel_d + EPS]);
 
-        // --- Wire channel: groove on user-facing face (Y=0), running X- to X+ ---
-        // Sits at the bottom front edge of the far end block — hidden by the
-        // base when mounted, visible only from below. Depth = cavity_wall_y
-        // so it opens into the hollow pocket at the far end.
-        translate([middle_x_end, -EPS, -EPS])
+        // --- Wire channel: groove on back face (Y=barre_width), running X- to X+ ---
+        // Opens at the back face closest to the piezo cutout. Centered on the
+        // same Y axis as the jack and screw. Cable exits the hollow pocket,
+        // routes along the back edge toward the piezo in the middle section.
+        translate([middle_x_end, barre_width - cavity_wall_y - EPS, -EPS])
             cube([cavity_x_min + cavity_x_span - middle_x_end,
                   cavity_wall_y + EPS,
                   wire_channel_w + EPS]);
