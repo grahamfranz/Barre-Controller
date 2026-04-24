@@ -68,7 +68,8 @@ piezo_indent_depth     = 0.8;
 // Sized for PJ398SM ("Thonkiconn") panel jack. Plug inserts
 // from above for Eurorack-style patching.
 jack_plug_hole_d     = 6.2;   // for 6 mm threaded barrel
-jack_plug_hole_wall  = 2.0;   // top shoulder (where the nut clamps)
+jack_cavity_d        = 12;    // hollow top cavity diameter for jack body
+jack_cavity_depth    = 8;     // hollow top cavity depth
 jack_pocket_d        = 10;    // body pocket diameter (~9 mm body + clearance)
 jack_pocket_depth    = 11;    // body pocket depth
 // Jack position: distance from the barre's +X face to pocket centre.
@@ -127,9 +128,9 @@ pocket_top_z         = end_thickness - jack_plug_hole_wall;
 pocket_bot_z         = pocket_top_z - jack_pocket_depth;
 
 near_screw_x     = end_length_near / 2;
-// Far screw sits just behind the jack pocket (toward -X), centred in Y.
+// Far screw sits just in front of the jack pocket (toward +X), centred in Y.
 // It clamps the far end block down to the base independently of the notch.
-far_screw_x      = jack_pocket_x_center - jack_pocket_d / 2 - 4;
+far_screw_x      = jack_pocket_x_center + jack_pocket_d / 2 + 1.5;
 
 array_span_y     = (num_barres - 1) * barre_pitch + barre_width;
 base_outer_x     = 2 * base_margin_x + barre_length;
@@ -203,6 +204,14 @@ module barre() {
                    pocket_top_z - EPS])
             cylinder(d = jack_plug_hole_d,
                      h = jack_plug_hole_wall + 2 * EPS);
+
+        // --- Hollow top cavity for jack mounting and cable routing ---
+        // Creates space at the top of the far end block for the jack body
+        // and allows cable paths to route back toward the piezo.
+        translate([jack_pocket_x_center, barre_width / 2,
+                   end_thickness - jack_cavity_depth])
+            cylinder(d = jack_cavity_d,
+                     h = jack_cavity_depth + EPS);
 
         // --- Notch on underside of far block (mates with rail) ---
         translate([notch_x_center - notch_width / 2, -EPS, -EPS])
