@@ -66,16 +66,20 @@ piezo_d                = 20;
 piezo_indent_clearance = 0.4;
 piezo_indent_depth     = 0.8;
 
-/* [Thonk Jack — 3.5 mm TS, side-mounted] */
+/* [Thonk Jack — 3.5 mm TS, top-mounted] */
 // Sized for PJ398SM ("Thonkiconn") panel jack. Plug inserts
-// from the user-facing (Y=0) side. Body sits in a hollow cavity
-// accessible from the back face (Y=barre_width).
+// from above. Body sits inside the hollow cavity for cable access.
 jack_plug_hole_d     = 6.2;   // for 6 mm threaded barrel
-jack_plug_hole_wall  = 2.0;   // front wall thickness (where the nut clamps)
+jack_plug_hole_wall  = 2.0;   // top shoulder (where the nut clamps)
 jack_pocket_d        = 10;    // body pocket diameter (~9 mm body + clearance)
-// Jack position: distance from the barre's +X face to pocket centre.
-// Screw sits in front of the jack (+X), so leave enough room.
+jack_pocket_depth    = 11;    // body pocket depth
 jack_offset_from_end = 14;
+
+/* [Hollow Cavity] */
+// Rectangular hollow in the far end block, open at back for cable access.
+cavity_front_wall    = 14;    // thickness of solid wall on user-facing (Y=0) side
+cavity_floor_thickness = 2;   // thickness of solid floor at bottom (Z)
+cavity_top_wall      = 2;     // thickness of solid wall at top (above jack shoulder)
 
 /* [Wire Channel] */
 // Grooves on the underside of the middle (up into it) and the
@@ -124,7 +128,13 @@ notch_width      = rail_width  + 2 * notch_clearance;
 notch_depth      = rail_height + notch_clearance;
 
 jack_pocket_x_center = barre_length - jack_offset_from_end;
-jack_z_center        = end_thickness / 2;   // jack axis height in the end block
+pocket_top_z         = end_thickness - jack_plug_hole_wall;
+pocket_bot_z         = pocket_top_z - jack_pocket_depth;
+
+cavity_depth         = barre_width - cavity_front_wall;  // how deep from back
+cavity_height        = end_thickness - cavity_floor_thickness - cavity_top_wall;
+cavity_x_span        = jack_pocket_d + 3;  // width to cover jack pocket + margin
+cavity_x_min         = jack_pocket_x_center - cavity_x_span / 2;
 
 near_screw_x     = end_length_near / 2;
 // Far screw sits just in front of the jack pocket (toward +X), centred in Y.
@@ -190,20 +200,22 @@ module barre() {
             cylinder(d = piezo_d + piezo_indent_clearance,
                      h = piezo_indent_depth + EPS);
 
-        // --- Horizontal Thonk jack ---
-        // Plug hole through the user-facing (Y=0) front wall.
-        // Threaded barrel protrudes out the front; nut clamps on the inside.
-        translate([jack_pocket_x_center, -EPS, jack_z_center])
-            rotate([-90, 0, 0])
-                cylinder(d = jack_plug_hole_d,
-                         h = jack_plug_hole_wall + EPS);
-        // Body cavity: hollow from the back face (Y=barre_width), away from user.
-        // Depth = barre_width - jack_plug_hole_wall so it meets the plug hole wall.
-        // Jack body and solder lugs live here; cables route out the back opening.
-        translate([jack_pocket_x_center, barre_width + EPS, jack_z_center])
-            rotate([90, 0, 0])
-                cylinder(d = jack_pocket_d,
-                         h = barre_width - jack_plug_hole_wall + EPS);
+        // --- Jack pocket: vertical, open at bottom ---
+        // Body pocket from Z=0 up to pocket_top_z, leaving a shoulder.
+        translate([jack_pocket_x_center, barre_width / 2, -EPS])
+            cylinder(d = jack_pocket_d,
+                     h = pocket_top_z + EPS);
+        // Plug hole through the top shoulder (for threaded barrel)
+        translate([jack_pocket_x_center, barre_width / 2,
+                   pocket_top_z - EPS])
+            cylinder(d = jack_plug_hole_d,
+                     h = jack_plug_hole_wall + 2 * EPS);
+
+        // --- Hollow cavity in far end block ---
+        // Rectangular cutout open at the back (Y=barre_width) for cable access.
+        // Leaves solid front wall, floor, and top walls around the jack.
+        translate([cavity_x_min, cavity_front_wall, cavity_floor_thickness])
+            cube([cavity_x_span, cavity_depth, cavity_height]);
 
         // --- Notch on underside of far block (mates with rail) ---
         translate([notch_x_center - notch_width / 2, -EPS, -EPS])
@@ -221,12 +233,12 @@ module barre() {
                   wire_channel_d + EPS]);
 
         // --- Wire channel: far block's underside groove ---
-        // Runs from the middle/far boundary to below the jack cavity.
-        // Cable exits here, bends up, and enters the back cavity to reach the lugs.
+        // Runs from the middle/far boundary toward the jack pocket.
+        // Wires can route up through the hollow cavity from here.
         translate([middle_x_end,
                    (barre_width - wire_channel_w) / 2,
                    -EPS])
-            cube([jack_pocket_x_center - middle_x_end,
+            cube([jack_pocket_x_center - jack_pocket_d / 2 - middle_x_end,
                   wire_channel_w,
                   wire_channel_d + EPS]);
     }
