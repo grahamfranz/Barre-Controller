@@ -198,11 +198,10 @@ module barre() {
                      h = piezo_indent_depth + EPS);
 
         // --- Bottom-up rectangular pocket for jack body + cable routing ---
-        // Opens at Z=0 (bottom face). Barre prints upside-down so this
-        // faces up during printing — jack drops in from above at that stage.
-        // Front/back walls (Y) stay solid; playing surface (Z top) stays solid.
+        // Opens at Z=0 (bottom face). Extends from front wall (Y=cavity_wall_y)
+        // all the way to back face (Y=barre_width) so the back groove can access it.
         translate([cavity_x_min, cavity_wall_y, -EPS])
-            cube([cavity_x_span, cavity_y_inner,
+            cube([cavity_x_span, barre_width - cavity_wall_y,
                   end_thickness - jack_plug_hole_wall + EPS]);
 
         // --- Barrel hole through the top shoulder ---
