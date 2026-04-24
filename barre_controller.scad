@@ -197,19 +197,20 @@ module barre() {
             cylinder(d = piezo_d + piezo_indent_clearance,
                      h = piezo_indent_depth + EPS);
 
-        // --- Jack barrel hole through top surface ---
-        // Small hole for the threaded barrel; nut clamps on top face.
-        translate([jack_pocket_x_center, barre_width / 2,
-                   cavity_floor_z - EPS])
-            cylinder(d = jack_plug_hole_d,
-                     h = end_thickness - cavity_floor_z + 2 * EPS);
-
-        // --- Top-down pocket for jack body and cable routing ---
-        // Open at the top (Z=end_thickness). All four side walls remain
-        // solid — nothing visible from the front, back, or sides.
-        translate([cavity_x_min, cavity_wall_y, cavity_floor_z])
+        // --- Bottom-up rectangular pocket for jack body + cable routing ---
+        // Opens at Z=0 (bottom face). Barre prints upside-down so this
+        // faces up during printing — jack drops in from above at that stage.
+        // Front/back walls (Y) stay solid; playing surface (Z top) stays solid.
+        translate([cavity_x_min, cavity_wall_y, -EPS])
             cube([cavity_x_span, cavity_y_inner,
-                  end_thickness - cavity_floor_z + EPS]);
+                  end_thickness - jack_plug_hole_wall + EPS]);
+
+        // --- Barrel hole through the top shoulder ---
+        // 2 mm shoulder at top face; nut clamps here.
+        translate([jack_pocket_x_center, barre_width / 2,
+                   end_thickness - jack_plug_hole_wall - EPS])
+            cylinder(d = jack_plug_hole_d,
+                     h = jack_plug_hole_wall + 2 * EPS);
 
         // --- Notch on underside of far block (mates with rail) ---
         translate([notch_x_center - notch_width / 2, -EPS, -EPS])
