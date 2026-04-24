@@ -76,10 +76,11 @@ jack_pocket_depth    = 11;    // body pocket depth
 jack_offset_from_end = 14;
 
 /* [Hollow Cavity] */
-// Rectangular hollow in the far end block, open at back for cable access.
-cavity_front_wall    = 14;    // thickness of solid wall on user-facing (Y=0) side
+// Rectangular cutout in the far end block for jack body clearance.
+// Open on both front (Y=0) and back (Y=barre_width) — just a tunnel
+// in Y with a floor and top wall around the jack.
 cavity_floor_thickness = 2;   // thickness of solid floor at bottom (Z)
-cavity_top_wall      = 2;     // thickness of solid wall at top (above jack shoulder)
+cavity_top_wall        = 2;   // thickness of solid wall at top (above jack shoulder)
 
 /* [Wire Channel] */
 // Grooves on the underside of the middle (up into it) and the
@@ -131,7 +132,6 @@ jack_pocket_x_center = barre_length - jack_offset_from_end;
 pocket_top_z         = end_thickness - jack_plug_hole_wall;
 pocket_bot_z         = pocket_top_z - jack_pocket_depth;
 
-cavity_depth         = barre_width - cavity_front_wall;  // how deep from back
 cavity_height        = end_thickness - cavity_floor_thickness - cavity_top_wall;
 cavity_x_span        = jack_pocket_d + 3;  // width to cover jack pocket + margin
 cavity_x_min         = jack_pocket_x_center - cavity_x_span / 2;
@@ -212,10 +212,10 @@ module barre() {
                      h = jack_plug_hole_wall + 2 * EPS);
 
         // --- Hollow cavity in far end block ---
-        // Rectangular cutout open at the back (Y=barre_width) for cable access.
-        // Leaves solid front wall, floor, and top walls around the jack.
-        translate([cavity_x_min, cavity_front_wall, cavity_floor_thickness])
-            cube([cavity_x_span, cavity_depth, cavity_height]);
+        // Tunnel in Y (open front and back) — just floor and top remain.
+        // Jack body sits inside; cable routes through freely.
+        translate([cavity_x_min, -EPS, cavity_floor_thickness])
+            cube([cavity_x_span, barre_width + 2 * EPS, cavity_height]);
 
         // --- Notch on underside of far block (mates with rail) ---
         translate([notch_x_center - notch_width / 2, -EPS, -EPS])
