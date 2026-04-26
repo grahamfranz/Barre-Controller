@@ -72,7 +72,6 @@ piezo_indent_depth     = 0.8;
 jack_plug_hole_d     = 6.2;   // for 6 mm threaded barrel
 jack_plug_hole_wall  = 2.0;   // top shoulder (where the nut clamps)
 jack_pocket_d        = 10;    // body pocket diameter (~9 mm body + clearance)
-jack_pocket_depth    = 11;    // body pocket depth
 jack_offset_from_end = 14;
 
 /* [Hollow Cavity] */
@@ -82,10 +81,8 @@ cavity_floor_z   = 3;    // Z height of the pocket floor
 cavity_wall_y    = 3;    // thickness of front/back walls (Y sides)
 
 /* [Wire Channel] */
-// Grooves on the underside of the middle (up into it) and the
-// underside of the far end block (connecting to the jack pocket
-// from below). Wires route through both with the flex gap air
-// between them.
+// Single groove on the back face of the far end block, opening into
+// the hollow pocket. Wire routes from jack lug through groove to piezo.
 wire_channel_w = 2;
 wire_channel_d = 1;
 
@@ -129,9 +126,8 @@ notch_depth      = rail_height + notch_clearance;
 
 jack_pocket_x_center = barre_length - jack_offset_from_end;
 
-cavity_x_span        = jack_pocket_d + 3;   // X extent (jack body + cable margin)
+cavity_x_span        = jack_pocket_d + 2;   // X extent (jack body + clearance, ends before screw)
 cavity_x_min         = jack_pocket_x_center - cavity_x_span / 2;
-cavity_y_inner       = barre_width - 2 * cavity_wall_y;  // pocket width in Y
 
 near_screw_x     = end_length_near / 2;
 // Far screw sits just in front of the jack pocket (toward +X), centred in Y.
@@ -217,19 +213,9 @@ module barre() {
                   barre_width + 2 * EPS,
                   notch_depth + EPS]);
 
-        // --- Wire channel: middle's underside groove ---
-        // From piezo centre out to the middle/far boundary.
-        translate([barre_length / 2,
-                   (barre_width - wire_channel_w) / 2,
-                   middle_bottom_z - EPS])
-            cube([middle_x_end - barre_length / 2,
-                  wire_channel_w,
-                  wire_channel_d + EPS]);
-
-        // --- Wire channel: groove on back face (Y=barre_width), running X- to X+ ---
-        // Opens at the back face where the hollow pocket opens, allowing cable
-        // to exit from inside the pocket and route toward the piezo.
-        // Spans the full pocket width in Y so connection is clear.
+        // --- Wire channel: groove on back of far end block, running X- to X+ ---
+        // Opens at the back where the hollow pocket opens, allowing cable
+        // to exit the pocket and route toward the piezo in the middle section.
         translate([middle_x_end, cavity_wall_y, -EPS])
             cube([cavity_x_min + cavity_x_span - middle_x_end,
                   barre_width - cavity_wall_y,
