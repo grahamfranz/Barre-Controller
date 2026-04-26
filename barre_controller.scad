@@ -194,8 +194,7 @@ module barre() {
                      h = piezo_indent_depth + EPS);
 
         // --- Bottom-up rectangular pocket for jack body + cable routing ---
-        // Opens at Z=0 (bottom face). Extends from front wall (Y=cavity_wall_y)
-        // all the way to back face (Y=barre_width) so the back groove can access it.
+        // Opens at Z=0 (bottom face). Front wall stays solid (Y=0 to cavity_wall_y).
         translate([cavity_x_min, cavity_wall_y, -EPS])
             cube([cavity_x_span, barre_width - cavity_wall_y,
                   end_thickness - jack_plug_hole_wall + EPS]);
@@ -213,22 +212,14 @@ module barre() {
                   barre_width + 2 * EPS,
                   notch_depth + EPS]);
 
-        // --- Wire channel: middle's underside groove toward far end ---
-        // From piezo centre out toward the hollow pocket.
+        // --- Wire channel: groove from piezo centre into hollow cavity ---
+        // Runs along middle_bottom_z from piezo to cavity_x_min.
         translate([barre_length / 2,
                    (barre_width - wire_channel_w) / 2,
                    middle_bottom_z - EPS])
-            cube([middle_x_end - barre_length / 2,
+            cube([cavity_x_min - barre_length / 2,
                   wire_channel_w,
                   wire_channel_d + EPS]);
-
-        // --- Wire channel: groove on back of far end block, running X- to X+ ---
-        // Opens at the back where the hollow pocket opens, allowing cable
-        // to exit the pocket and route toward the piezo in the middle section.
-        translate([middle_x_end, cavity_wall_y, -EPS])
-            cube([cavity_x_min + cavity_x_span - middle_x_end,
-                  barre_width - cavity_wall_y,
-                  wire_channel_w + EPS]);
     }
 }
 
