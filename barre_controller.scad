@@ -78,7 +78,7 @@ jack_offset_from_end = 14;
 // Top-down pocket in the far end block. Open at the top (Z+) so
 // the jack drops in from above. All four side walls stay solid.
 cavity_floor_z   = 3;    // Z height of the pocket floor
-cavity_wall_y    = 4;    // thickness of front wall (Y side)
+cavity_wall_y    = 2;    // thickness of front/back walls (Y side)
 
 /* [Wire Channel] */
 // Single groove on the back face of the far end block, opening into
