@@ -78,7 +78,7 @@ jack_offset_from_end = 14;
 // Top-down pocket in the far end block. Open at the top (Z+) so
 // the jack drops in from above. All four side walls stay solid.
 cavity_floor_z   = 3;    // Z height of the pocket floor
-cavity_wall_y    = 3;    // thickness of front/back walls (Y sides)
+cavity_wall_y    = 4;    // thickness of front wall (Y side)
 
 /* [Wire Channel] */
 // Single groove on the back face of the far end block, opening into
@@ -126,7 +126,7 @@ notch_depth      = rail_height + notch_clearance;
 
 jack_pocket_x_center = barre_length - jack_offset_from_end;
 
-cavity_x_span        = jack_pocket_d + 2;   // X extent (jack body + clearance, ends before screw)
+cavity_x_span        = jack_pocket_d + 1;   // X extent (jack body + clearance, ends before screw)
 cavity_x_min         = jack_pocket_x_center - cavity_x_span / 2;
 
 near_screw_x     = end_length_near / 2;
@@ -212,6 +212,15 @@ module barre() {
             cube([notch_width,
                   barre_width + 2 * EPS,
                   notch_depth + EPS]);
+
+        // --- Wire channel: middle's underside groove toward far end ---
+        // From piezo centre out toward the hollow pocket.
+        translate([barre_length / 2,
+                   (barre_width - wire_channel_w) / 2,
+                   middle_bottom_z - EPS])
+            cube([middle_x_end - barre_length / 2,
+                  wire_channel_w,
+                  wire_channel_d + EPS]);
 
         // --- Wire channel: groove on back of far end block, running X- to X+ ---
         // Opens at the back where the hollow pocket opens, allowing cable
