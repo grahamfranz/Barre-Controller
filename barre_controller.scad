@@ -194,9 +194,9 @@ module barre() {
                      h = piezo_indent_depth + EPS);
 
         // --- Bottom-up rectangular pocket for jack body + cable routing ---
-        // Opens at Z=0 (bottom face). Front wall stays solid (Y=0 to cavity_wall_y).
+        // Opens at Z=0 (bottom face). Symmetrical walls on front and back.
         translate([cavity_x_min, cavity_wall_y, -EPS])
-            cube([cavity_x_span, barre_width - cavity_wall_y,
+            cube([cavity_x_span, barre_width - 2 * cavity_wall_y,
                   end_thickness - jack_plug_hole_wall + EPS]);
 
         // --- Barrel hole through the top shoulder ---
@@ -213,11 +213,11 @@ module barre() {
                   notch_depth + EPS]);
 
         // --- Wire channel: groove from piezo centre into hollow cavity ---
-        // Runs along middle_bottom_z from piezo to cavity_x_min.
+        // Runs along middle_bottom_z from piezo to cavity, with slight overlap.
         translate([barre_length / 2,
                    (barre_width - wire_channel_w) / 2,
                    middle_bottom_z - EPS])
-            cube([cavity_x_min - barre_length / 2,
+            cube([cavity_x_min + 0.5 - barre_length / 2,
                   wire_channel_w,
                   wire_channel_d + EPS]);
     }
