@@ -222,7 +222,7 @@ module barre() {
                       wire_channel_w,
                       wire_channel_d + EPS]);
         }
-        sphere(r = 1, $fn = 24);
+        sphere(r = 1, $fn = 8);
     }
 }
 
