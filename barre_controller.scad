@@ -169,57 +169,60 @@ module rounded_rect(l, w, h, r) {
 // ============================================================
 
 module barre() {
-    difference() {
-        union() {
-            // Near end block (full thickness)
-            cube([end_length_near, barre_width, end_thickness]);
-            // Middle section — elevated to create the flex gap
-            translate([middle_x_start, 0, middle_bottom_z])
-                cube([middle_length, barre_width, middle_thickness]);
-            // Far end block (full thickness, houses jack + notch)
-            translate([barre_length - end_length_far, 0, 0])
-                cube([end_length_far, barre_width, end_thickness]);
+    minkowski() {
+        difference() {
+            union() {
+                // Near end block (full thickness)
+                cube([end_length_near, barre_width, end_thickness]);
+                // Middle section — elevated to create the flex gap
+                translate([middle_x_start, 0, middle_bottom_z])
+                    cube([middle_length, barre_width, middle_thickness]);
+                // Far end block (full thickness, houses jack + notch)
+                translate([barre_length - end_length_far, 0, 0])
+                    cube([end_length_far, barre_width, end_thickness]);
+            }
+
+            // --- Screw through-holes (vertical) ---
+            for (sx = [near_screw_x, far_screw_x])
+                translate([sx, barre_width / 2, -EPS])
+                    cylinder(d = screw_clearance_d,
+                             h = end_thickness + 2 * EPS);
+
+            // --- Piezo indent on bottom of middle ---
+            translate([barre_length / 2, barre_width / 2,
+                       middle_bottom_z - EPS])
+                cylinder(d = piezo_d + piezo_indent_clearance,
+                         h = piezo_indent_depth + EPS);
+
+            // --- Bottom-up rectangular pocket for jack body + cable routing ---
+            // Opens at Z=0 (bottom face). Symmetrical walls on front and back.
+            translate([cavity_x_min, cavity_wall_y, -EPS])
+                cube([cavity_x_span, barre_width - 2 * cavity_wall_y,
+                      end_thickness - jack_plug_hole_wall + EPS]);
+
+            // --- Barrel hole through the top shoulder ---
+            // 2 mm shoulder at top face; nut clamps here.
+            translate([jack_pocket_x_center, barre_width / 2,
+                       end_thickness - jack_plug_hole_wall - EPS])
+                cylinder(d = jack_plug_hole_d,
+                         h = jack_plug_hole_wall + 2 * EPS);
+
+            // --- Notch on underside of far block (mates with rail) ---
+            translate([notch_x_center - notch_width / 2, -EPS, -EPS])
+                cube([notch_width,
+                      barre_width + 2 * EPS,
+                      notch_depth + EPS]);
+
+            // --- Wire channel: groove from piezo centre into hollow cavity ---
+            // Runs along middle_bottom_z from piezo to cavity, with slight overlap.
+            translate([barre_length / 2,
+                       (barre_width - wire_channel_w) / 2,
+                       middle_bottom_z - EPS])
+                cube([cavity_x_min + 0.5 - barre_length / 2,
+                      wire_channel_w,
+                      wire_channel_d + EPS]);
         }
-
-        // --- Screw through-holes (vertical) ---
-        for (sx = [near_screw_x, far_screw_x])
-            translate([sx, barre_width / 2, -EPS])
-                cylinder(d = screw_clearance_d,
-                         h = end_thickness + 2 * EPS);
-
-        // --- Piezo indent on bottom of middle ---
-        translate([barre_length / 2, barre_width / 2,
-                   middle_bottom_z - EPS])
-            cylinder(d = piezo_d + piezo_indent_clearance,
-                     h = piezo_indent_depth + EPS);
-
-        // --- Bottom-up rectangular pocket for jack body + cable routing ---
-        // Opens at Z=0 (bottom face). Symmetrical walls on front and back.
-        translate([cavity_x_min, cavity_wall_y, -EPS])
-            cube([cavity_x_span, barre_width - 2 * cavity_wall_y,
-                  end_thickness - jack_plug_hole_wall + EPS]);
-
-        // --- Barrel hole through the top shoulder ---
-        // 2 mm shoulder at top face; nut clamps here.
-        translate([jack_pocket_x_center, barre_width / 2,
-                   end_thickness - jack_plug_hole_wall - EPS])
-            cylinder(d = jack_plug_hole_d,
-                     h = jack_plug_hole_wall + 2 * EPS);
-
-        // --- Notch on underside of far block (mates with rail) ---
-        translate([notch_x_center - notch_width / 2, -EPS, -EPS])
-            cube([notch_width,
-                  barre_width + 2 * EPS,
-                  notch_depth + EPS]);
-
-        // --- Wire channel: groove from piezo centre into hollow cavity ---
-        // Runs along middle_bottom_z from piezo to cavity, with slight overlap.
-        translate([barre_length / 2,
-                   (barre_width - wire_channel_w) / 2,
-                   middle_bottom_z - EPS])
-            cube([cavity_x_min + 0.5 - barre_length / 2,
-                  wire_channel_w,
-                  wire_channel_d + EPS]);
+        sphere(r = 1, $fn = 24);
     }
 }
 
