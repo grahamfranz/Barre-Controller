@@ -48,7 +48,7 @@ barre_pitch = 28;   // Y centre-to-centre between barres
 
 /* [Barre Geometry] */
 barre_length     = 87;
-barre_width      = 20;
+barre_width      = 36;
 // End blocks must be wide enough (Y) for the horizontal jack body.
 // 14 mm fits a PJ398SM with margin in the Z direction.
 end_thickness    = 14;
@@ -62,7 +62,7 @@ screw_clearance_d = 3.4;   // M3 through-hole
 
 /* [Piezo] */
 // Glued to a shallow circular indent on the bottom of the middle.
-piezo_d                = 20;
+piezo_d                = 30;
 piezo_indent_clearance = 0.4;
 piezo_indent_depth     = 0.8;
 
