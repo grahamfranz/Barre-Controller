@@ -274,9 +274,11 @@ module base() {
 module show_both() {
     base();
     // Tile each barre next to the base, already print-ready
+    // Lower barres to match feet height when feet are enabled
+    barre_z = include_feet ? -foot_h : 0;
     for (i = [0 : num_barres - 1])
         translate([base_outer_x + 15,
-                   i * (barre_width + 3), 0])
+                   i * (barre_width + 3), barre_z])
             barre_for_print();
 }
 
