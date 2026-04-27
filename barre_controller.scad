@@ -83,8 +83,8 @@ cavity_wall_y    = 2;    // thickness of front/back walls (Y side)
 /* [Wire Channel] */
 // Single groove on the back face of the far end block, opening into
 // the hollow pocket. Wire routes from jack lug through groove to piezo.
-wire_channel_w = 2;
-wire_channel_d = 1;
+wire_channel_w = 5;
+wire_channel_d = 3;
 
 /* [Base] */
 base_margin_x  = 10;
