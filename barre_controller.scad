@@ -258,7 +258,7 @@ module show_both() {
     base();
     barre_z = include_feet ? -foot_h : 0;
     for (i = [0 : num_barres - 1])
-        translate([base_outer_x + 15,
+        translate([base_outer_x + 5,
                    i * (barre_width + 3), barre_z])
             barre_for_print();
 }
