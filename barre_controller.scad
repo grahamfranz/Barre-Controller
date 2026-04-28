@@ -192,9 +192,9 @@ module barre() {
                   notch_depth + EPS]);
 
         // --- Wire channel: groove extending into hollow cavity ---
-        // Positioned lower with Y offset to stay within barre bounds
+        // Centered on the width of the barre
         translate([barre_length / 2,
-                   wire_channel_w + 1,
+                   barre_width / 2 - wire_channel_w / 2,
                    middle_bottom_z - 6])
             cube([cavity_x_min + 0.5 - barre_length / 2,
                   wire_channel_w,
