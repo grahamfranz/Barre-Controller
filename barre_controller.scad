@@ -47,7 +47,7 @@ num_barres  = 4;
 barre_pitch = 40;   // Y centre-to-centre; must be >= barre_width
 
 /* [Barre Geometry] */
-barre_length  = 87;
+barre_length  = 110;
 barre_width   = 36;
 end_thickness = 14;
 
