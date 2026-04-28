@@ -88,7 +88,7 @@ wire_channel_d = 3;
 
 /* [Base] */
 base_margin_x  = 10;
-base_margin_y  = 10;
+base_margin_y  = 17;
 base_thickness = 4;
 base_corner_r  = 3;
 
