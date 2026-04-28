@@ -44,15 +44,15 @@ part = "both"; // [barre, base, both, assembled]
 
 /* [Array] */
 num_barres  = 4;
-barre_pitch = 40;   // Y centre-to-centre; must be >= barre_width
+barre_pitch = 37;   // Y centre-to-centre; must be >= barre_width
 
 /* [Barre Geometry] */
 barre_length  = 110;
-barre_width   = 36;
+barre_width   = 33;
 end_thickness = 14;
 
 /* [Piezo] */
-piezo_d = 30;
+piezo_d = 27;
 
 /* [Thonk Jack — 3.5 mm TS, top-mounted] */
 // Sized for PJ398SM ("Thonkiconn") panel jack. Plug inserts from above.
