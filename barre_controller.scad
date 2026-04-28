@@ -12,7 +12,7 @@
  *
  *  === Barre side profile (along X) ===
  *
- *   Z=end_thickness ┬───────────────┬──────────────┬──────────┐
+ *   Z=barre_height ┬───────────────┬──────────────┬──────────┐
  *                   │ near          │              │ jack     │
  *                   │ end  ┌────────┴──────────┐   │ block    │─┤← plug (Y=0)
  *                   │ block│ middle flex (thin)│   │ [hollow] │
@@ -26,7 +26,7 @@
  *  giving access to the solder lugs and cable routing.
  *  The far screw clamps in front of (+X of) the jack.
  *
- *  The middle's bottom sits (end_thickness - middle_thickness)
+ *  The middle's bottom sits (barre_height - middle_thickness)
  *  above the base, giving a natural flex gap so the middle can
  *  bow downward when pressed.
  *
@@ -48,11 +48,16 @@ barre_pitch = 37;   // Y centre-to-centre; must be >= barre_width
 
 /* [Barre Geometry] */
 barre_length  = 110;
-barre_width   = 33;
-end_thickness = 14;
+barre_width   = 28;
+barre_height  = 14;
+middle_thickness = 4;  // pressing surface thickness; thinner = more flex
+screw_clearance_d = 3.4;
+notch_offset_from_middle = 4;
 
 /* [Piezo] */
 piezo_d = 27;
+piezo_indent_clearance = 0.4;
+piezo_indent_depth = 0.8;
 
 /* [Thonk Jack — 3.5 mm TS, top-mounted] */
 // Sized for PJ398SM ("Thonkiconn") panel jack. Plug inserts from above.
@@ -60,43 +65,32 @@ jack_plug_hole_d     = 6.2;   // for 6 mm threaded barrel
 jack_plug_hole_wall  = 2.0;   // top shoulder (where the nut clamps)
 jack_pocket_d        = 10;    // body pocket diameter (~9 mm body + clearance)
 jack_offset_from_end = 14;
+cavity_wall_y = 2;
+wire_channel_w = 5;
+wire_channel_d = 2;
+
+/* [Base] */
+base_margin_x  = 10;
+base_margin_y  = 9;
+base_thickness = 4;
+base_corner_r  = 3;
+rail_width = 4;
+rail_height = 3;
 
 /* [Feet] */
 include_feet = true;
-
-// ============================================================
-//  Fixed / internal parameters
-// ============================================================
-
-middle_thickness = 4;
-end_length_near  = 15;
-end_length_far   = 29;
-
-screw_clearance_d = 3.4;
-
-piezo_indent_clearance = 0.4;
-piezo_indent_depth     = 0.8;
-
-cavity_wall_y = 2;
-
-wire_channel_w = 5;
-wire_channel_d = 3;
-
-base_margin_x  = 10;
-base_margin_y  = 17;
-base_thickness = 4;
-base_corner_r  = 3;
-
-rail_width               = 4;
-rail_height              = 3;
-notch_clearance          = 0.3;
-notch_offset_from_middle = 4;
-
 foot_d = 8;
-foot_h = 3;
 
 $fn = 48;
 EPS = 0.02;
+
+// ============================================================
+//  Internal parameters (computed)
+// ============================================================
+
+end_length_near  = 15;
+end_length_far   = 29;
+notch_clearance  = 0.3;
 
 // ============================================================
 //  Derived
@@ -105,7 +99,7 @@ EPS = 0.02;
 middle_length    = barre_length - end_length_near - end_length_far;
 middle_x_start   = end_length_near;
 middle_x_end     = barre_length - end_length_far;
-middle_bottom_z  = end_thickness - middle_thickness;
+middle_bottom_z  = barre_height - middle_thickness;
 
 notch_x_center   = middle_x_end + notch_offset_from_middle;
 notch_width      = rail_width  + 2 * notch_clearance;
@@ -133,7 +127,7 @@ function barre_y_center(i) = barre_y_start(i) + barre_width / 2;
 echo(str("Base: ", base_outer_x, " x ", base_outer_y,
          " x ", base_thickness + rail_height, " mm"));
 echo(str("Barre: ", barre_length, " x ", barre_width,
-         " x ", end_thickness, " mm  (middle ",
+         " x ", barre_height, " mm  (middle ",
          middle_thickness, " mm, flex gap ",
          middle_bottom_z, " mm)"));
 echo(str("Rail X (world): ", rail_x_center,
@@ -157,20 +151,20 @@ module barre() {
     difference() {
         union() {
             // Near end block (full thickness)
-            cube([end_length_near, barre_width, end_thickness]);
+            cube([end_length_near, barre_width, barre_height]);
             // Middle section — elevated to create the flex gap
             translate([middle_x_start, 0, middle_bottom_z])
                 cube([middle_length, barre_width, middle_thickness]);
             // Far end block (full thickness, houses jack + notch)
             translate([barre_length - end_length_far, 0, 0])
-                cube([end_length_far, barre_width, end_thickness]);
+                cube([end_length_far, barre_width, barre_height]);
         }
 
         // --- Screw through-holes (vertical) ---
         for (sx = [near_screw_x, far_screw_x])
             translate([sx, barre_width / 2, -EPS])
                 cylinder(d = screw_clearance_d,
-                         h = end_thickness + 2 * EPS);
+                         h = barre_height + 2 * EPS);
 
         // --- Piezo indent on bottom of middle ---
         translate([barre_length / 2, barre_width / 2,
@@ -182,12 +176,12 @@ module barre() {
         // Opens at Z=0 (bottom face). Symmetrical walls on front and back.
         translate([cavity_x_min, cavity_wall_y, -EPS])
             cube([cavity_x_span, barre_width - 2 * cavity_wall_y,
-                  end_thickness - jack_plug_hole_wall + EPS]);
+                  barre_height - jack_plug_hole_wall + EPS]);
 
         // --- Barrel hole through the top shoulder ---
         // 2 mm shoulder at top face; nut clamps here.
         translate([jack_pocket_x_center, barre_width / 2,
-                   end_thickness - jack_plug_hole_wall - EPS])
+                   barre_height - jack_plug_hole_wall - EPS])
             cylinder(d = jack_plug_hole_d,
                      h = jack_plug_hole_wall + 2 * EPS);
 
@@ -197,20 +191,21 @@ module barre() {
                   barre_width + 2 * EPS,
                   notch_depth + EPS]);
 
-        // --- Wire channel: groove from piezo centre into hollow cavity ---
+        // --- Wire channel: groove extending into hollow cavity ---
+        // Positioned to route from gap area up through the hollow
         translate([barre_length / 2,
                    (barre_width - wire_channel_w) / 2,
-                   middle_bottom_z - EPS])
+                   middle_bottom_z - 4])
             cube([cavity_x_min + 0.5 - barre_length / 2,
                   wire_channel_w,
-                  wire_channel_d + EPS]);
+                  middle_thickness + 5]);
     }
 }
 
 // Barre flipped into print orientation (top face on bed, every
 // cutout opens upward).
 module barre_for_print() {
-    translate([0, barre_width, end_thickness])
+    translate([0, barre_width, barre_height])
         rotate([180, 0, 0])
             barre();
 }
@@ -245,8 +240,8 @@ module base() {
         fi = base_corner_r + 2;
         for (fx = [fi, base_outer_x - fi],
              fy = [fi, base_outer_y - fi])
-            translate([fx, fy, -foot_h])
-                cylinder(d = foot_d, h = foot_h + EPS);
+            translate([fx, fy, -3])
+                cylinder(d = foot_d, h = 3 + EPS);
     }
 }
 
@@ -256,7 +251,7 @@ module base() {
 
 module show_both() {
     base();
-    barre_z = include_feet ? -foot_h : 0;
+    barre_z = include_feet ? -3 : 0;
     for (i = [0 : num_barres - 1])
         translate([base_outer_x + 5,
                    i * (barre_width + 3), barre_z])
