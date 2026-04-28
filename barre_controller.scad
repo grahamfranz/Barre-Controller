@@ -44,70 +44,57 @@ part = "both"; // [barre, base, both, assembled]
 
 /* [Array] */
 num_barres  = 4;
-barre_pitch = 28;   // Y centre-to-centre between barres
+barre_pitch = 40;   // Y centre-to-centre; must be >= barre_width
 
 /* [Barre Geometry] */
-barre_length     = 87;
-barre_width      = 36;
-// End blocks must be wide enough (Y) for the horizontal jack body.
-// 14 mm fits a PJ398SM with margin in the Z direction.
-end_thickness    = 14;
-// Thin flex middle. Smaller = more flex = more piezo signal.
-middle_thickness = 4;
-end_length_near  = 15;
-end_length_far   = 29;
-
-/* [Screws] */
-screw_clearance_d = 3.4;   // M3 through-hole
+barre_length  = 87;
+barre_width   = 36;
+end_thickness = 14;
 
 /* [Piezo] */
-// Glued to a shallow circular indent on the bottom of the middle.
-piezo_d                = 30;
-piezo_indent_clearance = 0.4;
-piezo_indent_depth     = 0.8;
+piezo_d = 30;
 
 /* [Thonk Jack — 3.5 mm TS, top-mounted] */
-// Sized for PJ398SM ("Thonkiconn") panel jack. Plug inserts
-// from above. Body sits inside the hollow cavity for cable access.
+// Sized for PJ398SM ("Thonkiconn") panel jack. Plug inserts from above.
 jack_plug_hole_d     = 6.2;   // for 6 mm threaded barrel
 jack_plug_hole_wall  = 2.0;   // top shoulder (where the nut clamps)
 jack_pocket_d        = 10;    // body pocket diameter (~9 mm body + clearance)
 jack_offset_from_end = 14;
 
-/* [Hollow Cavity] */
-// Top-down pocket in the far end block. Open at the top (Z+) so
-// the jack drops in from above. All four side walls stay solid.
-cavity_floor_z   = 3;    // Z height of the pocket floor
-cavity_wall_y    = 2;    // thickness of front/back walls (Y side)
+/* [Feet] */
+include_feet = true;
 
-/* [Wire Channel] */
-// Single groove on the back face of the far end block, opening into
-// the hollow pocket. Wire routes from jack lug through groove to piezo.
+// ============================================================
+//  Fixed / internal parameters
+// ============================================================
+
+middle_thickness = 4;
+end_length_near  = 15;
+end_length_far   = 29;
+
+screw_clearance_d = 3.4;
+
+piezo_indent_clearance = 0.4;
+piezo_indent_depth     = 0.8;
+
+cavity_wall_y = 2;
+
 wire_channel_w = 5;
 wire_channel_d = 3;
 
-/* [Base] */
 base_margin_x  = 10;
 base_margin_y  = 17;
 base_thickness = 4;
 base_corner_r  = 3;
 
-/* [Rail & Notch] */
-// Rail runs continuously across the full Y of the base. Each
-// barre has a matching notch on its underside at the same X.
-rail_width      = 4;     // X extent of rail
-rail_height     = 3;     // Z height above base top
-notch_clearance = 0.3;   // per-side clearance for easy drop-in
-// Notch centre X (barre local): a bit inside the far end block,
-// with enough wall between it and the jack pocket.
+rail_width               = 4;
+rail_height              = 3;
+notch_clearance          = 0.3;
 notch_offset_from_middle = 4;
 
-/* [Feet] */
-include_feet = true;
-foot_d       = 8;
-foot_h       = 3;
+foot_d = 8;
+foot_h = 3;
 
-/* [Quality] */
 $fn = 48;
 EPS = 0.02;
 
@@ -118,7 +105,7 @@ EPS = 0.02;
 middle_length    = barre_length - end_length_near - end_length_far;
 middle_x_start   = end_length_near;
 middle_x_end     = barre_length - end_length_far;
-middle_bottom_z  = end_thickness - middle_thickness;  // flex gap
+middle_bottom_z  = end_thickness - middle_thickness;
 
 notch_x_center   = middle_x_end + notch_offset_from_middle;
 notch_width      = rail_width  + 2 * notch_clearance;
@@ -126,12 +113,10 @@ notch_depth      = rail_height + notch_clearance;
 
 jack_pocket_x_center = barre_length - jack_offset_from_end;
 
-cavity_x_span        = jack_pocket_d + 1;   // X extent (jack body + clearance, ends before screw)
+cavity_x_span        = jack_pocket_d + 1;
 cavity_x_min         = jack_pocket_x_center - cavity_x_span / 2;
 
 near_screw_x     = end_length_near / 2;
-// Far screw sits just in front of the jack pocket (toward +X), centred in Y.
-// It clamps the far end block down to the base independently of the notch.
 far_screw_x      = jack_pocket_x_center + jack_pocket_d / 2 + 1.5;
 
 array_span_y     = (num_barres - 1) * barre_pitch + barre_width;
@@ -213,7 +198,6 @@ module barre() {
                   notch_depth + EPS]);
 
         // --- Wire channel: groove from piezo centre into hollow cavity ---
-        // Runs along middle_bottom_z from piezo to cavity, with slight overlap.
         translate([barre_length / 2,
                    (barre_width - wire_channel_w) / 2,
                    middle_bottom_z - EPS])
@@ -246,7 +230,6 @@ module base() {
         }
 
         // Per-barre screw holes through the base.
-        // Near + far screws both pass through base_thickness only.
         for (i = [0 : num_barres - 1]) {
             x0 = barre_x_start();
             yc = barre_y_center(i);
@@ -273,8 +256,6 @@ module base() {
 
 module show_both() {
     base();
-    // Tile each barre next to the base, already print-ready
-    // Lower barres to match feet height when feet are enabled
     barre_z = include_feet ? -foot_h : 0;
     for (i = [0 : num_barres - 1])
         translate([base_outer_x + 15,
