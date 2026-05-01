@@ -135,6 +135,26 @@ function barre_x_start()   = base_margin_x;
 function barre_y_start(i)  = base_margin_y + i * barre_pitch;
 function barre_y_center(i) = barre_y_start(i) + barre_width / 2;
 
+// Enclosure dimensions (computed when with_enclosure = true)
+panel_outer_x    = base_outer_x;
+panel_outer_y    = base_outer_y;
+panel_margin_x   = 1;  // Small clearance between panel and shell walls
+panel_width      = panel_outer_x - 2 * panel_margin_x;
+panel_depth      = panel_outer_y - 2 * panel_margin_x;
+
+// Screw boss corner positions (for both upper shell and lower panel)
+boss_corner_positions = [
+    [base_corner_r + screw_margin, base_corner_r + screw_margin],
+    [base_outer_x - base_corner_r - screw_margin, base_corner_r + screw_margin],
+    [base_corner_r + screw_margin, base_outer_y - base_corner_r - screw_margin],
+    [base_outer_x - base_corner_r - screw_margin, base_outer_y - base_corner_r - screw_margin]
+];
+
+// Piezo hole positions (one per barre, at X center, Y center of each barre)
+piezo_hole_positions = [for (i = [0 : num_barres - 1])
+    [barre_x_start() + barre_length / 2, barre_y_center(i)]
+];
+
 echo(str("Base: ", base_outer_x, " x ", base_outer_y,
          " x ", base_thickness + rail_height, " mm"));
 echo(str("Barre: ", barre_length, " x ", barre_width,
