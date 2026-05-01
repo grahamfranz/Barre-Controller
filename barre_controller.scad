@@ -89,7 +89,7 @@ piezo_hole_d = 3.5;      // Diameter of piezo wire pass-through holes (mm)
 lid_thickness = 3;       // Thickness of lower panel (mm)
 board_fastener_type = "hex_nut";  // [hex_nut, square_nut, self_tap]
 nut_pocket_depth = 2.4;  // Depth of hex-nut recess (mm)
-screw_margin = 5;        // Distance from panel corner to standoff center (mm)
+screw_margin = 45;       // Distance from panel corner to standoff center (mm), positioned away from barres
 include_edge_guides = true;  // Add optional edge guides on lower panel
 
 $fn = 48;
@@ -306,8 +306,13 @@ module upper_shell() {
 
         // --- Corner screw holes (M3 for connecting upper shell to lower panel) ---
         for (pos = boss_corner_positions) {
+            // M3 clearance hole through full top thickness
             translate([pos[0], pos[1], -EPS])
                 cylinder(d = 3.4, h = top_thickness + 2 * EPS, $fn = 16);
+
+            // Hexagonal recess for M3 hex cap screw head (6.5mm across flats, 2.5mm deep)
+            translate([pos[0], pos[1], top_thickness - 2.5 + EPS])
+                cylinder(d = 6.5, h = 2.5 + EPS, $fn = 6);
         }
 
         // --- Hollow interior of standoff tubes (for screw pass-through) ---
