@@ -242,6 +242,49 @@ module barre_for_print() {
 }
 
 // ============================================================
+//  Upper Shell (enclosure mode: barre housing with walls)
+// ============================================================
+
+module upper_shell() {
+    difference() {
+        union() {
+            // Main body: solid block with rounded corners and extended walls
+            rounded_rect(base_outer_x, base_outer_y,
+                        base_thickness + enclosure_height,
+                        base_corner_r);
+
+            // Continuous rail running across full Y
+            translate([rail_x_start, 0, base_thickness])
+                cube([rail_width, base_outer_y, rail_height]);
+        }
+
+        // --- Screw holes for barre mounting (unchanged, vertical) ---
+        for (i = [0 : num_barres - 1]) {
+            x0 = barre_x_start();
+            yc = barre_y_center(i);
+            for (sx = [near_screw_x, far_screw_x])
+                translate([x0 + sx, yc, -EPS])
+                    cylinder(d = screw_clearance_d,
+                             h = base_thickness + enclosure_height + 2 * EPS);
+        }
+
+        // --- Screw boss clearance holes (M3 through full height) ---
+        for (pos = boss_corner_positions) {
+            translate([pos[0], pos[1], -EPS])
+                cylinder(d = 3.4,  // M3 clearance
+                         h = base_thickness + enclosure_height + 2 * EPS, $fn = 20);
+        }
+
+        // --- Piezo wire pass-through holes (Z floor only) ---
+        for (pos = piezo_hole_positions) {
+            translate([pos[0], pos[1], base_thickness - EPS])
+                cylinder(d = piezo_hole_d,
+                         h = base_thickness + 2 * EPS, $fn = 16);
+        }
+    }
+}
+
+// ============================================================
 //  Base with continuous rail
 // ============================================================
 
