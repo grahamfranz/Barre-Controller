@@ -258,6 +258,7 @@ module barre_for_print() {
 
 module upper_shell() {
     wall_t = 2.5;  // Wall thickness
+    panel_slot_depth = lid_thickness + 1;  // Depth for panel to slide into (with slight clearance)
 
     difference() {
         union() {
@@ -282,11 +283,9 @@ module upper_shell() {
             translate([base_outer_x - wall_t, 0, base_thickness])
                 cube([wall_t, base_outer_y, enclosure_height]);
 
-            // Corner posts for fastening (at each corner)
-            for (pos = boss_corner_positions) {
-                translate([pos[0], pos[1], base_thickness])
-                    cylinder(d = 8, h = enclosure_height, $fn = 20);
-            }
+            // Bottom lip around perimeter for panel friction fit
+            translate([wall_t, wall_t, base_thickness - panel_slot_depth])
+                cube([base_outer_x - 2 * wall_t, base_outer_y - 2 * wall_t, panel_slot_depth]);
         }
 
         // --- Barre mounting screw holes (vertical through full height) ---
@@ -297,12 +296,6 @@ module upper_shell() {
                 translate([x0 + sx, yc, -EPS])
                     cylinder(d = screw_clearance_d,
                              h = base_thickness + enclosure_height + 2 * EPS);
-        }
-
-        // --- Corner post clearance holes (M3) ---
-        for (pos = boss_corner_positions) {
-            translate([pos[0], pos[1], -EPS])
-                cylinder(d = 3.4, h = base_thickness + enclosure_height + 2 * EPS, $fn = 20);
         }
 
         // --- Piezo wire holes through floor (small discrete holes) ---
@@ -318,12 +311,16 @@ module upper_shell() {
 // ============================================================
 
 module lower_panel() {
+    wall_t = 2.5;  // Must match upper shell wall thickness
+    panel_clearance = 0.3;  // Clearance for friction fit
+
     difference() {
         union() {
-            // Main panel: solid block with rounded corners
-            // Same footprint as upper shell floor for proper alignment
-            rounded_rect(panel_outer_x, panel_outer_y, lid_thickness,
-                        base_corner_r);
+            // Main panel: sized to fit inside enclosure walls with slight clearance
+            translate([wall_t + panel_clearance, wall_t + panel_clearance, 0])
+                rounded_rect(base_outer_x - 2 * (wall_t + panel_clearance),
+                            base_outer_y - 2 * (wall_t + panel_clearance),
+                            lid_thickness, base_corner_r);
 
             // Standoffs at four corners (for circuit board mounting)
             for (pos = boss_corner_positions) {
@@ -332,7 +329,7 @@ module lower_panel() {
             }
         }
 
-        // --- M3 screw holes through standoffs and panel ---
+        // --- M3 screw holes through standoffs and panel (for circuit board fastening) ---
         for (pos = boss_corner_positions) {
             // Hole through full height (standoff + panel)
             translate([pos[0], pos[1], -EPS])
@@ -340,40 +337,6 @@ module lower_panel() {
                          h = lid_thickness + board_standoff_height + 2 * EPS,
                          $fn = 20);
         }
-
-        // --- Hex-nut pockets (recessed into underside for screw fastening) ---
-        if (board_fastener_type == "hex_nut") {
-            // Hexagonal pockets for M3 hex nuts
-            for (pos = boss_corner_positions) {
-                translate([pos[0], pos[1], -EPS])
-                    cylinder(d = 6.5,  // M3 hex nut width-across-flats (~5.5mm) + clearance
-                             h = nut_pocket_depth + EPS,
-                             $fn = 6);
-            }
-        }
-        else if (board_fastener_type == "square_nut") {
-            // Square nut pockets for M3 square nuts
-            for (pos = boss_corner_positions) {
-                translate([pos[0] - 3, pos[1] - 3, -EPS])
-                    cube([6, 6, nut_pocket_depth + EPS]);
-            }
-        }
-        // If self_tap, no pockets needed
-    }
-
-    // --- Optional edge guides (shallow lips on top to help alignment) ---
-    if (include_edge_guides) {
-        // Small guide lips on inner edges to center panel under upper shell
-        guide_height = 1;
-        guide_inset = 2;
-        translate([0, 0, lid_thickness])
-            difference() {
-                rounded_rect(panel_outer_x, panel_outer_y, guide_height,
-                            base_corner_r);
-                rounded_rect(panel_outer_x - 2 * guide_inset,
-                            panel_outer_y - 2 * guide_inset,
-                            guide_height + EPS, base_corner_r);
-            }
     }
 }
 
