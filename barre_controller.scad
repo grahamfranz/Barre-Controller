@@ -306,7 +306,7 @@ module upper_shell() {
 
         // --- Corner screw holes (M3 for connecting upper shell to lower panel) ---
         for (pos = boss_corner_positions) {
-            translate([pos[0], pos[1], top_thickness + EPS])
+            translate([pos[0], pos[1], -EPS])
                 cylinder(d = 3.4, h = top_thickness + 2 * EPS, $fn = 16);
         }
 
