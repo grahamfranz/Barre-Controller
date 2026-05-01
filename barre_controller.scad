@@ -89,7 +89,7 @@ piezo_hole_d = 3.5;      // Diameter of piezo wire pass-through holes (mm)
 lid_thickness = 3;       // Thickness of lower panel (mm)
 board_fastener_type = "hex_nut";  // [hex_nut, square_nut, self_tap]
 nut_pocket_depth = 2.4;  // Depth of hex-nut recess (mm)
-screw_margin = 45;       // Distance from panel corner to standoff center (mm), positioned away from barres
+screw_margin = 35;       // Distance from corner to screw center (mm), keeps screws in corners while avoiding barres
 include_edge_guides = true;  // Add optional edge guides on lower panel
 
 $fn = 48;
@@ -315,9 +315,9 @@ module upper_shell() {
                 cylinder(d = 6.5, h = 2.5 + EPS, $fn = 6);
         }
 
-        // --- Hollow interior of standoff tubes (for screw pass-through) ---
+        // --- Hollow interior of standoff tubes (for screw pass-through) - goes full height ---
         for (pos = boss_corner_positions) {
-            translate([pos[0], pos[1], -standoff_height + EPS])
+            translate([pos[0], pos[1], -standoff_height])
                 cylinder(d = standoff_id, h = standoff_height, $fn = 16);
         }
 
