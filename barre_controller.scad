@@ -84,6 +84,7 @@ foot_d = 14;  // increased for better base support
 /* [Enclosure] */
 with_enclosure = false;  // Enable two-part enclosure mode
 enclosure_height = 15;   // Height of upper shell walls (mm)
+rim_height = 7;          // Height of lower panel rim (mm)
 board_standoff_height = 3;  // Height of circuit board above lower panel (mm)
 piezo_hole_d = 3.5;      // Diameter of piezo wire pass-through holes (mm)
 lid_thickness = 3;       // Thickness of lower panel (mm)
@@ -337,27 +338,54 @@ module lower_panel() {
     panel_x_offset = wall_t + panel_clearance;
     panel_y_offset = wall_t + panel_clearance;
     standoff_od = 8;  // Must match upper shell standoff outer diameter
+    standoff_height = board_standoff_height / 2;  // Half height for component clearance
+    rim_border = 2.5;  // Thickness of rim walls
 
     difference() {
         union() {
-            // Main panel: sized to fit inside enclosure walls with slight clearance
-            // Positioned at the bottom opening (Z = -enclosure_height)
+            // Main panel base
             translate([panel_x_offset, panel_y_offset, -enclosure_height])
                 rounded_rect(inner_width, inner_depth, lid_thickness, base_corner_r);
+
+            // Raised rim around full perimeter (prevents lateral shifting)
+            translate([panel_x_offset, panel_y_offset, -enclosure_height + lid_thickness])
+                difference() {
+                    rounded_rect(inner_width, inner_depth, rim_height, base_corner_r);
+                    // Hollow out interior, leaving rim walls
+                    translate([rim_border, rim_border, -EPS])
+                        rounded_rect(inner_width - 2 * rim_border,
+                                   inner_depth - 2 * rim_border,
+                                   rim_height + 2 * EPS,
+                                   base_corner_r - rim_border);
+                }
+
+            // Corner standoffs for circuit board mounting (half height)
+            for (pos = boss_corner_positions) {
+                translate([pos[0], pos[1], -enclosure_height + lid_thickness])
+                    cylinder(d = standoff_od, h = standoff_height, $fn = 20);
+            }
         }
 
-        // --- Holes for upper shell standoff tubes to pass through ---
-        // Screw passes through the hollow interior of the tube, not through the panel
+        // --- M3 screw holes (shaft size 3.0 mm, not clearance) ---
         for (pos = boss_corner_positions) {
             translate([pos[0], pos[1], -enclosure_height - EPS])
-                cylinder(d = standoff_od + 0.5, h = lid_thickness + 2 * EPS, $fn = 20);
+                cylinder(d = 3.0, h = lid_thickness + standoff_height + 2 * EPS, $fn = 16);
         }
 
-        // --- M3 screw holes for circuit board fastening to the panel ---
-        for (pos = boss_corner_positions) {
-            translate([pos[0], pos[1], -enclosure_height - EPS])
-                cylinder(d = 3.2, h = lid_thickness + 2 * EPS, $fn = 16);
+        // --- Hex-nut pockets (recessed into underside of panel) ---
+        if (board_fastener_type == "hex_nut") {
+            for (pos = boss_corner_positions) {
+                translate([pos[0], pos[1], -enclosure_height - EPS])
+                    cylinder(d = 6.5, h = nut_pocket_depth + EPS, $fn = 6);
+            }
         }
+        else if (board_fastener_type == "square_nut") {
+            for (pos = boss_corner_positions) {
+                translate([pos[0], pos[1] - 3, -enclosure_height - EPS])
+                    cube([6, 6, nut_pocket_depth + EPS]);
+            }
+        }
+        // If self_tap, no pockets needed
     }
 }
 
