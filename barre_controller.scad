@@ -257,60 +257,59 @@ module barre_for_print() {
 // ============================================================
 
 module upper_shell() {
-    wall_thickness = 2;  // Wall thickness for hollow enclosure
+    wall_t = 2.5;  // Wall thickness
 
     difference() {
         union() {
-            // Outer walls: rounded rectangle shell
-            rounded_rect(base_outer_x, base_outer_y,
-                        base_thickness + enclosure_height,
-                        base_corner_r);
+            // Floor slab with rail on top
+            translate([0, 0, 0])
+                rounded_rect(base_outer_x, base_outer_y, base_thickness, base_corner_r);
 
-            // Continuous rail running across full Y (on top surface for barre mounting)
-            translate([rail_x_start, 0, base_thickness + enclosure_height - rail_height])
+            // Continuous rail on TOP of floor (for barre mounting)
+            translate([rail_x_start, 0, base_thickness])
                 cube([rail_width, base_outer_y, rail_height]);
 
-            // Screw boss corner posts (for fastening to lower panel)
+            // Four side walls (hollow box structure)
+            // Front wall (Y=0)
+            translate([0, 0, 0])
+                cube([base_outer_x, wall_t, base_thickness + enclosure_height]);
+            // Back wall (Y=base_outer_y)
+            translate([0, base_outer_y - wall_t, 0])
+                cube([base_outer_x, wall_t, base_thickness + enclosure_height]);
+            // Left wall (X=0)
+            translate([0, 0, 0])
+                cube([wall_t, base_outer_y, base_thickness + enclosure_height]);
+            // Right wall (X=base_outer_x)
+            translate([base_outer_x - wall_t, 0, 0])
+                cube([wall_t, base_outer_y, base_thickness + enclosure_height]);
+
+            // Corner posts for fastening (at each corner)
             for (pos = boss_corner_positions) {
                 translate([pos[0], pos[1], base_thickness])
                     cylinder(d = 8, h = enclosure_height, $fn = 20);
             }
         }
 
-        // --- Hollow out the interior (create enclosure cavity) ---
-        // Interior cavity (walls and floor only, open bottom)
-        interior_width = panel_width + 2;  // Small clearance for lower panel
-        interior_depth = panel_depth + 2;
-        interior_margin_x = (base_outer_x - interior_width) / 2;
-        interior_margin_y = (base_outer_y - interior_depth) / 2;
-
-        translate([interior_margin_x, interior_margin_y, wall_thickness])
-            rounded_rect(interior_width, interior_depth,
-                        base_thickness + enclosure_height - wall_thickness + EPS,
-                        base_corner_r - 1);
-
-        // --- Screw holes for barre mounting (unchanged, vertical) ---
+        // --- Barre mounting screw holes ---
         for (i = [0 : num_barres - 1]) {
             x0 = barre_x_start();
             yc = barre_y_center(i);
             for (sx = [near_screw_x, far_screw_x])
-                translate([x0 + sx, yc, base_thickness - EPS])
+                translate([x0 + sx, yc, -EPS])
                     cylinder(d = screw_clearance_d,
-                             h = enclosure_height + 2 * EPS);
+                             h = base_thickness + enclosure_height + 2 * EPS);
         }
 
-        // --- Screw boss clearance holes (M3 through full height) ---
+        // --- Corner post clearance holes (M3) ---
         for (pos = boss_corner_positions) {
             translate([pos[0], pos[1], -EPS])
-                cylinder(d = 3.4,  // M3 clearance
-                         h = base_thickness + enclosure_height + 2 * EPS, $fn = 20);
+                cylinder(d = 3.4, h = base_thickness + enclosure_height + 2 * EPS, $fn = 20);
         }
 
-        // --- Piezo wire pass-through holes (in floor) ---
+        // --- Piezo wire holes through floor ---
         for (pos = piezo_hole_positions) {
-            translate([pos[0], pos[1], wall_thickness - EPS])
-                cylinder(d = piezo_hole_d,
-                         h = wall_thickness + 2 * EPS, $fn = 16);
+            translate([pos[0], pos[1], base_thickness - EPS])
+                cylinder(d = piezo_hole_d, h = base_thickness + 2 * EPS, $fn = 16);
         }
     }
 }
