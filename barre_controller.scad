@@ -324,7 +324,7 @@ module lower_panel() {
         else if (board_fastener_type == "square_nut") {
             // Square nut pockets
             for (pos = boss_corner_positions) {
-                translate([pos[0], pos[1] - 3, -EPS])
+                translate([pos[0] - 3, pos[1] - 3, -EPS])
                     cube([6, 6, nut_pocket_depth + EPS]);
             }
         }
@@ -335,7 +335,6 @@ module lower_panel() {
     if (include_edge_guides) {
         // Small guide lips on inner edges to prevent sliding
         guide_height = 1;
-        guide_width = 2;
         translate([0, 0, lid_thickness])
             difference() {
                 rounded_rect(panel_outer_x, panel_outer_y, guide_height,
