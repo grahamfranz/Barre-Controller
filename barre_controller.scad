@@ -256,6 +256,12 @@ module upper_shell() {
             // Continuous rail running across full Y
             translate([rail_x_start, 0, base_thickness])
                 cube([rail_width, base_outer_y, rail_height]);
+
+            // Screw boss corner posts (for fastening to lower panel)
+            for (pos = boss_corner_positions) {
+                translate([pos[0], pos[1], base_thickness])
+                    cylinder(d = 8, h = enclosure_height, $fn = 20);
+            }
         }
 
         // --- Screw holes for barre mounting (unchanged, vertical) ---
