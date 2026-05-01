@@ -164,6 +164,17 @@ echo(str("Barre: ", barre_length, " x ", barre_width,
 echo(str("Rail X (world): ", rail_x_center,
          ",  jack X (barre local): ", jack_pocket_x_center));
 
+if (with_enclosure) {
+    echo(str("=== ENCLOSURE MODE ==="));
+    echo(str("Upper Shell: ", panel_outer_x, " x ", panel_outer_y,
+             " x ", base_thickness + enclosure_height, " mm"));
+    echo(str("Lower Panel: ", panel_outer_x, " x ", panel_outer_y,
+             " x ", lid_thickness, " mm"));
+    echo(str("Board Standoff Height: ", board_standoff_height, " mm"));
+    echo(str("Piezo Holes: ", len(piezo_hole_positions), " holes, diameter ",
+             piezo_hole_d, " mm"));
+}
+
 // ============================================================
 //  Helpers
 // ============================================================
