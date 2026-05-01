@@ -261,27 +261,26 @@ module upper_shell() {
 
     difference() {
         union() {
-            // Floor slab with rail on top
-            translate([0, 0, 0])
-                rounded_rect(base_outer_x, base_outer_y, base_thickness, base_corner_r);
+            // Floor slab with rounded corners
+            rounded_rect(base_outer_x, base_outer_y, base_thickness, base_corner_r);
 
-            // Continuous rail on TOP of floor (for barre mounting)
+            // Continuous rail on TOP of floor (for barre mounting, unchanged)
             translate([rail_x_start, 0, base_thickness])
                 cube([rail_width, base_outer_y, rail_height]);
 
-            // Four side walls (hollow box structure)
+            // Four hollow side walls (creating an enclosure box)
             // Front wall (Y=0)
-            translate([0, 0, 0])
-                cube([base_outer_x, wall_t, base_thickness + enclosure_height]);
-            // Back wall (Y=base_outer_y)
-            translate([0, base_outer_y - wall_t, 0])
-                cube([base_outer_x, wall_t, base_thickness + enclosure_height]);
+            translate([0, 0, base_thickness])
+                cube([base_outer_x, wall_t, enclosure_height]);
+            // Back wall (Y=base_outer_y - wall_t)
+            translate([0, base_outer_y - wall_t, base_thickness])
+                cube([base_outer_x, wall_t, enclosure_height]);
             // Left wall (X=0)
-            translate([0, 0, 0])
-                cube([wall_t, base_outer_y, base_thickness + enclosure_height]);
-            // Right wall (X=base_outer_x)
-            translate([base_outer_x - wall_t, 0, 0])
-                cube([wall_t, base_outer_y, base_thickness + enclosure_height]);
+            translate([0, 0, base_thickness])
+                cube([wall_t, base_outer_y, enclosure_height]);
+            // Right wall (X=base_outer_x - wall_t)
+            translate([base_outer_x - wall_t, 0, base_thickness])
+                cube([wall_t, base_outer_y, enclosure_height]);
 
             // Corner posts for fastening (at each corner)
             for (pos = boss_corner_positions) {
@@ -290,7 +289,7 @@ module upper_shell() {
             }
         }
 
-        // --- Barre mounting screw holes ---
+        // --- Barre mounting screw holes (vertical through full height) ---
         for (i = [0 : num_barres - 1]) {
             x0 = barre_x_start();
             yc = barre_y_center(i);
@@ -306,7 +305,7 @@ module upper_shell() {
                 cylinder(d = 3.4, h = base_thickness + enclosure_height + 2 * EPS, $fn = 20);
         }
 
-        // --- Piezo wire holes through floor ---
+        // --- Piezo wire holes through floor (small discrete holes) ---
         for (pos = piezo_hole_positions) {
             translate([pos[0], pos[1], base_thickness - EPS])
                 cylinder(d = piezo_hole_d, h = base_thickness + 2 * EPS, $fn = 16);
@@ -322,6 +321,7 @@ module lower_panel() {
     difference() {
         union() {
             // Main panel: solid block with rounded corners
+            // Same footprint as upper shell floor for proper alignment
             rounded_rect(panel_outer_x, panel_outer_y, lid_thickness,
                         base_corner_r);
 
@@ -341,9 +341,9 @@ module lower_panel() {
                          $fn = 20);
         }
 
-        // --- Hex-nut pockets (recessed into underside) ---
+        // --- Hex-nut pockets (recessed into underside for screw fastening) ---
         if (board_fastener_type == "hex_nut") {
-            // Hexagonal pockets
+            // Hexagonal pockets for M3 hex nuts
             for (pos = boss_corner_positions) {
                 translate([pos[0], pos[1], -EPS])
                     cylinder(d = 6.5,  // M3 hex nut width-across-flats (~5.5mm) + clearance
@@ -352,7 +352,7 @@ module lower_panel() {
             }
         }
         else if (board_fastener_type == "square_nut") {
-            // Square nut pockets
+            // Square nut pockets for M3 square nuts
             for (pos = boss_corner_positions) {
                 translate([pos[0] - 3, pos[1] - 3, -EPS])
                     cube([6, 6, nut_pocket_depth + EPS]);
@@ -361,16 +361,18 @@ module lower_panel() {
         // If self_tap, no pockets needed
     }
 
-    // --- Optional edge guides (shallow lips to center panel) ---
+    // --- Optional edge guides (shallow lips on top to help alignment) ---
     if (include_edge_guides) {
-        // Small guide lips on inner edges to prevent sliding
+        // Small guide lips on inner edges to center panel under upper shell
         guide_height = 1;
+        guide_inset = 2;
         translate([0, 0, lid_thickness])
             difference() {
                 rounded_rect(panel_outer_x, panel_outer_y, guide_height,
                             base_corner_r);
-                rounded_rect(panel_width, panel_depth, guide_height + EPS,
-                            base_corner_r);
+                rounded_rect(panel_outer_x - 2 * guide_inset,
+                            panel_outer_y - 2 * guide_inset,
+                            guide_height + EPS, base_corner_r);
             }
     }
 }
