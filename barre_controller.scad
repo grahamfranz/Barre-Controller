@@ -257,15 +257,17 @@ module barre_for_print() {
 // ============================================================
 
 module upper_shell() {
+    wall_thickness = 2;  // Wall thickness for hollow enclosure
+
     difference() {
         union() {
-            // Main body: solid block with rounded corners and extended walls
+            // Outer walls: rounded rectangle shell
             rounded_rect(base_outer_x, base_outer_y,
                         base_thickness + enclosure_height,
                         base_corner_r);
 
-            // Continuous rail running across full Y
-            translate([rail_x_start, 0, base_thickness])
+            // Continuous rail running across full Y (on top surface for barre mounting)
+            translate([rail_x_start, 0, base_thickness + enclosure_height - rail_height])
                 cube([rail_width, base_outer_y, rail_height]);
 
             // Screw boss corner posts (for fastening to lower panel)
@@ -275,14 +277,26 @@ module upper_shell() {
             }
         }
 
+        // --- Hollow out the interior (create enclosure cavity) ---
+        // Interior cavity (walls and floor only, open bottom)
+        interior_width = panel_width + 2;  // Small clearance for lower panel
+        interior_depth = panel_depth + 2;
+        interior_margin_x = (base_outer_x - interior_width) / 2;
+        interior_margin_y = (base_outer_y - interior_depth) / 2;
+
+        translate([interior_margin_x, interior_margin_y, wall_thickness])
+            rounded_rect(interior_width, interior_depth,
+                        base_thickness + enclosure_height - wall_thickness + EPS,
+                        base_corner_r - 1);
+
         // --- Screw holes for barre mounting (unchanged, vertical) ---
         for (i = [0 : num_barres - 1]) {
             x0 = barre_x_start();
             yc = barre_y_center(i);
             for (sx = [near_screw_x, far_screw_x])
-                translate([x0 + sx, yc, -EPS])
+                translate([x0 + sx, yc, base_thickness - EPS])
                     cylinder(d = screw_clearance_d,
-                             h = base_thickness + enclosure_height + 2 * EPS);
+                             h = enclosure_height + 2 * EPS);
         }
 
         // --- Screw boss clearance holes (M3 through full height) ---
@@ -292,11 +306,11 @@ module upper_shell() {
                          h = base_thickness + enclosure_height + 2 * EPS, $fn = 20);
         }
 
-        // --- Piezo wire pass-through holes (Z floor only) ---
+        // --- Piezo wire pass-through holes (in floor) ---
         for (pos = piezo_hole_positions) {
-            translate([pos[0], pos[1], base_thickness - EPS])
+            translate([pos[0], pos[1], wall_thickness - EPS])
                 cylinder(d = piezo_hole_d,
-                         h = base_thickness + 2 * EPS, $fn = 16);
+                         h = wall_thickness + 2 * EPS, $fn = 16);
         }
     }
 }
