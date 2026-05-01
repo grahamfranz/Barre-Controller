@@ -285,6 +285,68 @@ module upper_shell() {
 }
 
 // ============================================================
+//  Lower Panel (enclosure mode: circuit board mount base)
+// ============================================================
+
+module lower_panel() {
+    difference() {
+        union() {
+            // Main panel: solid block with rounded corners
+            rounded_rect(panel_outer_x, panel_outer_y, lid_thickness,
+                        base_corner_r);
+
+            // Standoffs at four corners (for circuit board mounting)
+            for (pos = boss_corner_positions) {
+                translate([pos[0], pos[1], lid_thickness])
+                    cylinder(d = 6, h = board_standoff_height, $fn = 20);
+            }
+        }
+
+        // --- M3 screw holes through standoffs and panel ---
+        for (pos = boss_corner_positions) {
+            // Hole through full height (standoff + panel)
+            translate([pos[0], pos[1], -EPS])
+                cylinder(d = 3.2,  // M3 clearance
+                         h = lid_thickness + board_standoff_height + 2 * EPS,
+                         $fn = 20);
+        }
+
+        // --- Hex-nut pockets (recessed into underside) ---
+        if (board_fastener_type == "hex_nut") {
+            // Hexagonal pockets
+            for (pos = boss_corner_positions) {
+                translate([pos[0], pos[1], -EPS])
+                    cylinder(d = 6.5,  // M3 hex nut width-across-flats (~5.5mm) + clearance
+                             h = nut_pocket_depth + EPS,
+                             $fn = 6);
+            }
+        }
+        else if (board_fastener_type == "square_nut") {
+            // Square nut pockets
+            for (pos = boss_corner_positions) {
+                translate([pos[0], pos[1] - 3, -EPS])
+                    cube([6, 6, nut_pocket_depth + EPS]);
+            }
+        }
+        // If self_tap, no pockets needed
+    }
+
+    // --- Optional edge guides (shallow lips to center panel) ---
+    if (include_edge_guides) {
+        // Small guide lips on inner edges to prevent sliding
+        guide_height = 1;
+        guide_width = 2;
+        translate([0, 0, lid_thickness])
+            difference() {
+                rounded_rect(panel_outer_x, panel_outer_y, guide_height,
+                            base_corner_r);
+                rounded_rect(panel_width, panel_depth, guide_height + EPS,
+                            base_corner_r);
+            }
+    }
+}
+
+// ============================================================
 //  Base with continuous rail
 // ============================================================
 
