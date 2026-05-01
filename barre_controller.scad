@@ -260,6 +260,9 @@ module barre_for_print() {
 module upper_shell() {
     wall_t = 2.5;  // Wall thickness
     top_thickness = base_thickness;  // Top surface thickness where barres mount
+    standoff_od = 8;  // Outer diameter of corner standoff tubes
+    standoff_id = 3.4;  // Inner diameter for M3 screw clearance
+    standoff_height = enclosure_height - 1;  // Hollow tubes extending down
 
     difference() {
         union() {
@@ -283,6 +286,12 @@ module upper_shell() {
             // Right wall (X=base_outer_x - wall_t)
             translate([base_outer_x - wall_t, 0, -enclosure_height])
                 cube([wall_t, base_outer_y, enclosure_height]);
+
+            // Corner standoff tubes (hollow tubes extending down for circuit board support)
+            for (pos = boss_corner_positions) {
+                translate([pos[0], pos[1], 0])
+                    cylinder(d = standoff_od, h = -standoff_height, $fn = 20);
+            }
         }
 
         // --- Barre mounting screw holes (vertical through top surface) ---
@@ -293,6 +302,18 @@ module upper_shell() {
                 translate([x0 + sx, yc, -enclosure_height - EPS])
                     cylinder(d = screw_clearance_d,
                              h = enclosure_height + top_thickness + 2 * EPS);
+        }
+
+        // --- Corner screw holes (M3 for connecting upper shell to lower panel) ---
+        for (pos = boss_corner_positions) {
+            translate([pos[0], pos[1], top_thickness + EPS])
+                cylinder(d = 3.4, h = top_thickness + 2 * EPS, $fn = 16);
+        }
+
+        // --- Hollow interior of standoff tubes (for screw pass-through) ---
+        for (pos = boss_corner_positions) {
+            translate([pos[0], pos[1], -standoff_height + EPS])
+                cylinder(d = standoff_id, h = standoff_height, $fn = 16);
         }
 
         // --- Piezo wire holes through top surface ---
@@ -314,6 +335,7 @@ module lower_panel() {
     inner_depth = base_outer_y - 2 * (wall_t + panel_clearance);
     panel_x_offset = wall_t + panel_clearance;
     panel_y_offset = wall_t + panel_clearance;
+    standoff_od = 8;  // Must match upper shell standoff outer diameter
 
     difference() {
         union() {
@@ -321,21 +343,18 @@ module lower_panel() {
             // Positioned at the bottom opening (Z = -enclosure_height)
             translate([panel_x_offset, panel_y_offset, -enclosure_height])
                 rounded_rect(inner_width, inner_depth, lid_thickness, base_corner_r);
-
-            // Standoffs at four corners (for circuit board mounting)
-            for (pos = boss_corner_positions) {
-                translate([pos[0], pos[1], -enclosure_height + lid_thickness])
-                    cylinder(d = 6, h = board_standoff_height, $fn = 20);
-            }
         }
 
-        // --- M3 screw holes through standoffs and panel (for circuit board fastening) ---
+        // --- Holes for upper shell standoff tubes to pass through ---
         for (pos = boss_corner_positions) {
-            // Hole through full height (standoff + panel)
             translate([pos[0], pos[1], -enclosure_height - EPS])
-                cylinder(d = 3.2,  // M3 clearance
-                         h = lid_thickness + board_standoff_height + 2 * EPS,
-                         $fn = 20);
+                cylinder(d = standoff_od + 0.5, h = lid_thickness + 2 * EPS, $fn = 20);
+        }
+
+        // --- M3 screw holes for circuit board fastening (through the panel) ---
+        for (pos = boss_corner_positions) {
+            translate([pos[0], pos[1], -enclosure_height - EPS])
+                cylinder(d = 3.2, h = lid_thickness + 2 * EPS, $fn = 16);
         }
     }
 }
