@@ -40,7 +40,7 @@
  * ============================================================ */
 
 /* [Render] */
-part = "both"; // [barre, base, both, assembled]
+part = "both"; // [barre, base, both, assembled, enclosure_shell, enclosure_panel, enclosure_both, enclosure_assembled]
 
 /* [Array] */
 num_barres  = 4;
@@ -407,7 +407,29 @@ module show_assembled() {
             barre();
 }
 
-if      (part == "barre")     barre_for_print();
-else if (part == "base")      base();
-else if (part == "both")      show_both();
-else if (part == "assembled") show_assembled();
+if (with_enclosure) {
+    // Enclosure modes
+    if      (part == "enclosure_shell") upper_shell();
+    else if (part == "enclosure_panel") lower_panel();
+    else if (part == "enclosure_both") {
+        // Both parts positioned for printing
+        upper_shell();
+        translate([base_outer_x + 5, 0, 0]) lower_panel();
+    }
+    else if (part == "enclosure_assembled") {
+        // Assembled view: upper shell + lower panel + barres
+        upper_shell();
+        lower_panel();
+        for (i = [0 : num_barres - 1])
+            translate([barre_x_start(), barre_y_start(i),
+                      base_thickness])
+                barre();
+    }
+}
+else {
+    // Original modes (backward compatibility)
+    if      (part == "barre")     barre_for_print();
+    else if (part == "base")      base();
+    else if (part == "both")      show_both();
+    else if (part == "assembled") show_assembled();
+}
