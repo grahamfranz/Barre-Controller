@@ -289,8 +289,8 @@ module upper_shell() {
 
             // Corner standoff tubes (hollow tubes extending down for circuit board support)
             for (pos = boss_corner_positions) {
-                translate([pos[0], pos[1], 0])
-                    cylinder(d = standoff_od, h = -standoff_height, $fn = 20);
+                translate([pos[0], pos[1], -standoff_height])
+                    cylinder(d = standoff_od, h = standoff_height, $fn = 20);
             }
         }
 
@@ -346,12 +346,13 @@ module lower_panel() {
         }
 
         // --- Holes for upper shell standoff tubes to pass through ---
+        // Screw passes through the hollow interior of the tube, not through the panel
         for (pos = boss_corner_positions) {
             translate([pos[0], pos[1], -enclosure_height - EPS])
                 cylinder(d = standoff_od + 0.5, h = lid_thickness + 2 * EPS, $fn = 20);
         }
 
-        // --- M3 screw holes for circuit board fastening (through the panel) ---
+        // --- M3 screw holes for circuit board fastening to the panel ---
         for (pos = boss_corner_positions) {
             translate([pos[0], pos[1], -enclosure_height - EPS])
                 cylinder(d = 3.2, h = lid_thickness + 2 * EPS, $fn = 16);
