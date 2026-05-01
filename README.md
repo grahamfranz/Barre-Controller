@@ -40,10 +40,11 @@ Key parameters in `barre_controller.scad`:
 | Parameter | Default | Purpose |
 |-----------|---------|---------|
 | `num_barres` | 4 | Number of barres in the array |
-| `barre_pitch` | 28 mm | Center-to-center spacing between barres |
-| `barre_length` | 80 mm | Total length of each barre |
+| `barre_pitch` | 37 mm | Center-to-center spacing between barres |
+| `barre_length` | 110 mm | Total length of each barre |
 | `middle_thickness` | 4 mm | Flex section thickness (smaller = more flex) |
-| `jack_offset_from_end` | 7 mm | Distance from far end to jack pocket center |
+| `jack_offset_from_end` | 14 mm | Distance from far end to jack pocket center |
+| `foot_d` | 14 mm | Feet diameter (for base support) |
 
 ## Manufacturing Notes
 

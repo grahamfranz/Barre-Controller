@@ -79,7 +79,7 @@ rail_height = 3;
 
 /* [Feet] */
 include_feet = true;
-foot_d = 8;
+foot_d = 14;  // increased for better base support
 
 $fn = 48;
 EPS = 0.02;
@@ -107,11 +107,11 @@ notch_depth      = rail_height + notch_clearance;
 
 jack_pocket_x_center = barre_length - jack_offset_from_end;
 
-cavity_x_span        = jack_pocket_d + 1;
+cavity_x_span        = jack_pocket_d + 6;  // expanded for better wiring room
 cavity_x_min         = jack_pocket_x_center - cavity_x_span / 2;
 
 near_screw_x     = end_length_near / 2;
-far_screw_x      = jack_pocket_x_center + jack_pocket_d / 2 + 1.5;
+far_screw_x      = barre_length - 5;  // moved to far end, 5mm from end
 
 array_span_y     = (num_barres - 1) * barre_pitch + barre_width;
 base_outer_x     = 2 * base_margin_x + barre_length;
@@ -237,7 +237,7 @@ module base() {
 
     // Feet
     if (include_feet) {
-        fi = base_corner_r + 2;
+        fi = base_corner_r + foot_d / 2 + 1;  // positioned to stay within base edges
         for (fx = [fi, base_outer_x - fi],
              fy = [fi, base_outer_y - fi])
             translate([fx, fy, -3])
