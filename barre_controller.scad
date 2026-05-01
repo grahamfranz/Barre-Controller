@@ -85,7 +85,7 @@ foot_d = 14;  // increased for better base support
 with_enclosure = false;  // Enable two-part enclosure mode
 enclosure_height = 15;   // Height of upper shell walls (mm)
 board_standoff_height = 3;  // Height of circuit board above lower panel (mm)
-piezo_hole_d = 1.5;      // Diameter of piezo wire pass-through holes (mm)
+piezo_hole_d = 3.5;      // Diameter of piezo wire pass-through holes (mm)
 lid_thickness = 3;       // Thickness of lower panel (mm)
 board_fastener_type = "hex_nut";  // [hex_nut, square_nut, self_tap]
 nut_pocket_depth = 2.4;  // Depth of hex-nut recess (mm)
@@ -150,9 +150,10 @@ boss_corner_positions = [
     [base_outer_x - base_corner_r - screw_margin, base_outer_y - base_corner_r - screw_margin]
 ];
 
-// Piezo hole positions (one per barre, at X center, Y center of each barre)
+// Piezo hole positions (one per barre, positioned under the jack cavity for cable routing)
+// Placed at the far end (jack) area so cables can route up to jacks or down to circuit board
 piezo_hole_positions = [for (i = [0 : num_barres - 1])
-    [barre_x_start() + barre_length / 2, barre_y_center(i)]
+    [barre_x_start() + jack_pocket_x_center, barre_y_center(i)]
 ];
 
 echo(str("Base: ", base_outer_x, " x ", base_outer_y,
