@@ -258,50 +258,46 @@ module barre_for_print() {
 
 module upper_shell() {
     wall_t = 2.5;  // Wall thickness
-    panel_slot_depth = lid_thickness + 1;  // Depth for panel to slide into (with slight clearance)
+    top_thickness = base_thickness;  // Top surface thickness where barres mount
 
     difference() {
         union() {
-            // Floor slab with rounded corners
-            rounded_rect(base_outer_x, base_outer_y, base_thickness, base_corner_r);
+            // Top mounting surface with rounded corners (barres mount here)
+            rounded_rect(base_outer_x, base_outer_y, top_thickness, base_corner_r);
 
-            // Continuous rail on TOP of floor (for barre mounting, unchanged)
-            translate([rail_x_start, 0, base_thickness])
+            // Continuous rail on TOP of mounting surface (for barre mounting)
+            translate([rail_x_start, 0, top_thickness])
                 cube([rail_width, base_outer_y, rail_height]);
 
-            // Four hollow side walls (creating an enclosure box)
+            // Four side walls extending DOWN from the top mounting surface
             // Front wall (Y=0)
-            translate([0, 0, base_thickness])
+            translate([0, 0, -enclosure_height])
                 cube([base_outer_x, wall_t, enclosure_height]);
             // Back wall (Y=base_outer_y - wall_t)
-            translate([0, base_outer_y - wall_t, base_thickness])
+            translate([0, base_outer_y - wall_t, -enclosure_height])
                 cube([base_outer_x, wall_t, enclosure_height]);
             // Left wall (X=0)
-            translate([0, 0, base_thickness])
+            translate([0, 0, -enclosure_height])
                 cube([wall_t, base_outer_y, enclosure_height]);
             // Right wall (X=base_outer_x - wall_t)
-            translate([base_outer_x - wall_t, 0, base_thickness])
+            translate([base_outer_x - wall_t, 0, -enclosure_height])
                 cube([wall_t, base_outer_y, enclosure_height]);
-
-            // Bottom lip around perimeter for panel friction fit
-            translate([wall_t, wall_t, base_thickness - panel_slot_depth])
-                cube([base_outer_x - 2 * wall_t, base_outer_y - 2 * wall_t, panel_slot_depth]);
         }
 
-        // --- Barre mounting screw holes (vertical through full height) ---
+        // --- Barre mounting screw holes (vertical through top surface) ---
         for (i = [0 : num_barres - 1]) {
             x0 = barre_x_start();
             yc = barre_y_center(i);
             for (sx = [near_screw_x, far_screw_x])
-                translate([x0 + sx, yc, -EPS])
+                translate([x0 + sx, yc, -enclosure_height - EPS])
                     cylinder(d = screw_clearance_d,
-                             h = base_thickness + enclosure_height + 2 * EPS);
+                             h = enclosure_height + top_thickness + 2 * EPS);
         }
 
-        // --- Piezo wire holes through floor (small discrete holes) ---
+        // --- Piezo wire holes through top surface ---
         for (pos = piezo_hole_positions) {
-            translate([pos[0], pos[1], base_thickness - EPS])
-                cylinder(d = piezo_hole_d, h = base_thickness + 2 * EPS, $fn = 16);
+            translate([pos[0], pos[1], -EPS])
+                cylinder(d = piezo_hole_d, h = top_thickness + 2 * EPS, $fn = 16);
         }
     }
 }
@@ -313,18 +309,21 @@ module upper_shell() {
 module lower_panel() {
     wall_t = 2.5;  // Must match upper shell wall thickness
     panel_clearance = 0.3;  // Clearance for friction fit
+    inner_width = base_outer_x - 2 * (wall_t + panel_clearance);
+    inner_depth = base_outer_y - 2 * (wall_t + panel_clearance);
+    panel_x_offset = wall_t + panel_clearance;
+    panel_y_offset = wall_t + panel_clearance;
 
     difference() {
         union() {
             // Main panel: sized to fit inside enclosure walls with slight clearance
-            translate([wall_t + panel_clearance, wall_t + panel_clearance, 0])
-                rounded_rect(base_outer_x - 2 * (wall_t + panel_clearance),
-                            base_outer_y - 2 * (wall_t + panel_clearance),
-                            lid_thickness, base_corner_r);
+            // Positioned at the bottom opening (Z = -enclosure_height)
+            translate([panel_x_offset, panel_y_offset, -enclosure_height])
+                rounded_rect(inner_width, inner_depth, lid_thickness, base_corner_r);
 
             // Standoffs at four corners (for circuit board mounting)
             for (pos = boss_corner_positions) {
-                translate([pos[0], pos[1], lid_thickness])
+                translate([pos[0], pos[1], -enclosure_height + lid_thickness])
                     cylinder(d = 6, h = board_standoff_height, $fn = 20);
             }
         }
@@ -332,7 +331,7 @@ module lower_panel() {
         // --- M3 screw holes through standoffs and panel (for circuit board fastening) ---
         for (pos = boss_corner_positions) {
             // Hole through full height (standoff + panel)
-            translate([pos[0], pos[1], -EPS])
+            translate([pos[0], pos[1], -enclosure_height - EPS])
                 cylinder(d = 3.2,  // M3 clearance
                          h = lid_thickness + board_standoff_height + 2 * EPS,
                          $fn = 20);
@@ -406,12 +405,11 @@ if (with_enclosure) {
         translate([base_outer_x + 5, 0, 0]) lower_panel();
     }
     else if (part == "enclosure_assembled") {
-        // Assembled view: upper shell + lower panel + barres
-        upper_shell();
+        // Assembled view: lower panel at bottom, upper shell, barres on top
         lower_panel();
+        upper_shell();
         for (i = [0 : num_barres - 1])
-            translate([barre_x_start(), barre_y_start(i),
-                      base_thickness])
+            translate([barre_x_start(), barre_y_start(i), base_thickness])
                 barre();
     }
 }
