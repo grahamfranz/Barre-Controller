@@ -81,6 +81,17 @@ rail_height = 3;
 include_feet = true;
 foot_d = 14;  // increased for better base support
 
+/* [Enclosure] */
+with_enclosure = false;  // Enable two-part enclosure mode
+enclosure_height = 15;   // Height of upper shell walls (mm)
+board_standoff_height = 3;  // Height of circuit board above lower panel (mm)
+piezo_hole_d = 1.5;      // Diameter of piezo wire pass-through holes (mm)
+lid_thickness = 3;       // Thickness of lower panel (mm)
+board_fastener_type = "hex_nut";  // [hex_nut, square_nut, self_tap]
+nut_pocket_depth = 2.4;  // Depth of hex-nut recess (mm)
+screw_margin = 5;        // Distance from panel corner to standoff center (mm)
+include_edge_guides = true;  // Add optional edge guides on lower panel
+
 $fn = 48;
 EPS = 0.02;
 
