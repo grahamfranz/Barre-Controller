@@ -90,7 +90,7 @@ piezo_hole_d = 3.5;      // Diameter of piezo wire pass-through holes (mm)
 lid_thickness = 3;       // Thickness of lower panel (mm)
 board_fastener_type = "hex_nut";  // [hex_nut, square_nut, self_tap]
 nut_pocket_depth = 2.4;  // Depth of hex-nut recess (mm)
-screw_margin = 8;        // Distance from corner to screw center (mm), positions screws in corners
+screw_margin = 13;       // Distance from corner to screw center (mm), positions screws in corners
 include_edge_guides = true;  // Add optional edge guides on lower panel
 
 $fn = 48;
@@ -263,37 +263,25 @@ module upper_shell() {
     top_thickness = base_thickness;  // Top surface thickness where barres mount
     standoff_od = 8;  // Outer diameter of corner standoff tubes
     standoff_id = 3.4;  // Inner diameter for M3 screw clearance
-    standoff_height = enclosure_height - 1;  // Hollow tubes extending down
+    standoff_height = 5;  // Short standoffs for shell support, leaves room for PCB
 
     difference() {
         union() {
-            // Top mounting surface with rounded corners (barres mount here)
-            rounded_rect(base_outer_x, base_outer_y, top_thickness, base_corner_r);
+            // Rounded box body extending from -enclosure_height to top_thickness
+            // This maintains rounded corners all the way down the walls
+            translate([0, 0, -enclosure_height])
+                rounded_rect(base_outer_x, base_outer_y, top_thickness + enclosure_height, base_corner_r);
 
             // Continuous rail on TOP of mounting surface (for barre mounting)
             translate([rail_x_start, 0, top_thickness])
                 cube([rail_width, base_outer_y, rail_height]);
-
-            // Four side walls extending DOWN from the top mounting surface
-            // Front wall (Y=0)
-            translate([0, 0, -enclosure_height])
-                cube([base_outer_x, wall_t, enclosure_height]);
-            // Back wall (Y=base_outer_y - wall_t)
-            translate([0, base_outer_y - wall_t, -enclosure_height])
-                cube([base_outer_x, wall_t, enclosure_height]);
-            // Left wall (X=0)
-            translate([0, 0, -enclosure_height])
-                cube([wall_t, base_outer_y, enclosure_height]);
-            // Right wall (X=base_outer_x - wall_t)
-            translate([base_outer_x - wall_t, 0, -enclosure_height])
-                cube([wall_t, base_outer_y, enclosure_height]);
-
-            // Corner standoff tubes (hollow tubes extending down for circuit board support)
-            for (pos = boss_corner_positions) {
-                translate([pos[0], pos[1], -standoff_height])
-                    cylinder(d = standoff_od, h = standoff_height, $fn = 20);
-            }
         }
+
+        // --- Hollow out interior (bottom-open shell) ---
+        // Subtract slightly smaller rounded box to create walls
+        translate([wall_t, wall_t, -enclosure_height])
+            rounded_rect(base_outer_x - 2 * wall_t, base_outer_y - 2 * wall_t,
+                        enclosure_height + EPS, base_corner_r - wall_t);
 
         // --- Barre mounting screw holes (vertical through top surface) ---
         for (i = [0 : num_barres - 1]) {
@@ -324,6 +312,19 @@ module upper_shell() {
                 cylinder(d = piezo_hole_d, h = top_thickness + 2 * EPS, $fn = 16);
         }
     }
+
+    // Corner standoff tubes (added after difference to prevent subtraction)
+    // Hollow them out for screw pass-through
+    difference() {
+        for (pos = boss_corner_positions) {
+            translate([pos[0], pos[1], -standoff_height])
+                cylinder(d = standoff_od, h = standoff_height, $fn = 20);
+        }
+        for (pos = boss_corner_positions) {
+            translate([pos[0], pos[1], -standoff_height - EPS])
+                cylinder(d = standoff_id, h = standoff_height + 2 * EPS, $fn = 16);
+        }
+    }
 }
 
 // ============================================================
@@ -332,56 +333,50 @@ module upper_shell() {
 
 module lower_panel() {
     wall_t = 2.5;  // Must match upper shell wall thickness
-    panel_clearance = 0.3;  // Clearance for friction fit
-    inner_width = base_outer_x - 2 * (wall_t + panel_clearance);
-    inner_depth = base_outer_y - 2 * (wall_t + panel_clearance);
-    panel_x_offset = wall_t + panel_clearance;
-    panel_y_offset = wall_t + panel_clearance;
+    locating_fit = 0.3;  // Clearance for locating plug to fit into shell
+    plug_width = base_outer_x - 2 * (wall_t + locating_fit);
+    plug_depth = base_outer_y - 2 * (wall_t + locating_fit);
+    plug_x_offset = wall_t + locating_fit;
+    plug_y_offset = wall_t + locating_fit;
     standoff_od = 8;  // Must match upper shell standoff outer diameter
-    standoff_height = board_standoff_height / 2;  // Half height for component clearance
-    rim_border = 2.5;  // Thickness of rim walls
+    standoff_height = board_standoff_height;  // Full height for component clearance (was half)
+    total_panel_height = lid_thickness + rim_height;
 
+    translate([0, 0, -enclosure_height])
     difference() {
         union() {
-            // Main panel base
-            translate([panel_x_offset, panel_y_offset, -enclosure_height])
-                rounded_rect(inner_width, inner_depth, lid_thickness, base_corner_r);
+            // Solid base plate (full footprint)
+            rounded_rect(base_outer_x, base_outer_y, lid_thickness, base_corner_r);
 
-            // Raised rim around full perimeter (prevents lateral shifting)
-            translate([panel_x_offset, panel_y_offset, -enclosure_height + lid_thickness])
-                difference() {
-                    rounded_rect(inner_width, inner_depth, rim_height, base_corner_r);
-                    // Hollow out interior, leaving rim walls
-                    translate([rim_border, rim_border, -EPS])
-                        rounded_rect(inner_width - 2 * rim_border,
-                                   inner_depth - 2 * rim_border,
-                                   rim_height + 2 * EPS,
-                                   base_corner_r - rim_border);
-                }
+            // Raised locating rim/plug (sits inside shell opening for lateral location)
+            // Slightly undersized so it slides into the shell cavity without binding
+            translate([plug_x_offset, plug_y_offset, lid_thickness])
+                rounded_rect(plug_width, plug_depth, rim_height,
+                           max(0.5, base_corner_r - locating_fit));
 
-            // Corner standoffs for circuit board mounting (half height)
+            // Corner standoffs for circuit board mounting
             for (pos = boss_corner_positions) {
-                translate([pos[0], pos[1], -enclosure_height + lid_thickness])
+                translate([pos[0], pos[1], lid_thickness])
                     cylinder(d = standoff_od, h = standoff_height, $fn = 20);
             }
         }
 
         // --- M3 screw holes (shaft size 3.0 mm, not clearance) ---
         for (pos = boss_corner_positions) {
-            translate([pos[0], pos[1], -enclosure_height - EPS])
-                cylinder(d = 3.0, h = lid_thickness + standoff_height + 2 * EPS, $fn = 16);
+            translate([pos[0], pos[1], -EPS])
+                cylinder(d = 3.0, h = total_panel_height + standoff_height + 2 * EPS, $fn = 16);
         }
 
-        // --- Hex-nut pockets (recessed into underside of panel) ---
+        // --- Hex-nut pockets (recessed into underside of base plate) ---
         if (board_fastener_type == "hex_nut") {
             for (pos = boss_corner_positions) {
-                translate([pos[0], pos[1], -enclosure_height - EPS])
+                translate([pos[0], pos[1], -EPS])
                     cylinder(d = 6.5, h = nut_pocket_depth + EPS, $fn = 6);
             }
         }
         else if (board_fastener_type == "square_nut") {
             for (pos = boss_corner_positions) {
-                translate([pos[0], pos[1] - 3, -enclosure_height - EPS])
+                translate([pos[0], pos[1] - 3, -EPS])
                     cube([6, 6, nut_pocket_depth + EPS]);
             }
         }
