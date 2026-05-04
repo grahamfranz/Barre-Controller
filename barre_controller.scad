@@ -78,8 +78,8 @@ rail_width = 4;
 rail_height = 3;
 
 /* [Feet] */
-include_feet = true;
-foot_d = 14;  // increased for better base support
+include_feet = false;  // Feet don't prevent base deflection; users can add rubber pads instead
+foot_d = 14;  // Diameter of feet (for experimental base support)
 
 /* [Enclosure] */
 with_enclosure = false;  // Enable two-part enclosure mode
@@ -92,6 +92,10 @@ board_fastener_type = "hex_nut";  // [hex_nut, square_nut, self_tap]
 nut_pocket_depth = 2.4;  // Depth of hex-nut recess (mm)
 screw_margin = 13;       // Distance from corner to screw center (mm), positions screws in corners
 include_edge_guides = true;  // Add optional edge guides on lower panel
+
+/* [Enclosure — Power Switch] */
+include_switch = true;   // Add M16x2 threaded barrel power switch pocket
+switch_d = 14.5;         // Hole diameter for M16x2 threaded barrel switch (slight clearance)
 
 $fn = 48;
 EPS = 0.02;
@@ -156,6 +160,12 @@ boss_corner_positions = [
 piezo_hole_positions = [for (i = [0 : num_barres - 1])
     [barre_x_start() + jack_pocket_x_center, barre_y_center(i)]
 ];
+
+// Power switch position: front-left edge (Y-min side) at mid-height for ergonomic thumb access
+// Positioned ~15mm from the left corner, at height that reaches above the rim
+switch_x = base_outer_x / 4;  // Left-center area
+switch_y = 0;  // Front face (will be on the wall)
+switch_z = -enclosure_height / 2 + rim_height / 2;  // Mid-height of wall
 
 echo(str("Base: ", base_outer_x, " x ", base_outer_y,
          " x ", base_thickness + rail_height, " mm"));
@@ -310,6 +320,14 @@ module upper_shell() {
         for (pos = piezo_hole_positions) {
             translate([pos[0], pos[1], -EPS])
                 cylinder(d = piezo_hole_d, h = top_thickness + 2 * EPS, $fn = 16);
+        }
+
+        // --- Power switch hole through front wall ---
+        if (include_switch) {
+            // Cylinder through front Y-wall
+            translate([switch_x, 1.25, switch_z])
+                rotate([90, 0, 0])
+                    cylinder(d = switch_d, h = 2.5, center=true, $fn = 32);
         }
     }
 

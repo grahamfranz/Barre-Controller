@@ -44,12 +44,14 @@ Key parameters in `barre_controller.scad`:
 | `barre_length` | 110 mm | Total length of each barre |
 | `middle_thickness` | 4 mm | Flex section thickness (smaller = more flex) |
 | `jack_offset_from_end` | 14 mm | Distance from far end to jack pocket center |
-| `foot_d` | 14 mm | Feet diameter (for base support) |
+| `include_feet` | false | Enable corner feet for base support (experimental) |
+| `foot_d` | 14 mm | Diameter of corner feet (tunable when enabled) |
 
 ## Manufacturing Notes
 
 - Material: PLA or similar suitable for FDM printing
 - Print orientation: See "Printing" section above
+- **Base deflection:** The corner feet feature is disabled by default (`include_feet = false`) because small feet don't effectively prevent base flex when pressing the barres. If experimenting with feet, increase `foot_d` to larger values (e.g., 18–20 mm) for more rigidity. Alternatively, add adhesive rubber pads (~12 mm diameter) to the underside corners or increase `base_thickness` parametrically
 - Piezo sensors are glued to the bottom of each middle section
 - Thonk jack bodies mount from below through the pocket opening
 - Wire routing connects jack terminals to piezo sensor
@@ -78,12 +80,14 @@ In the OpenSCAD Customizer:
 |-----------|---------|---------|
 | `enclosure_height` | 15 mm | Height of upper shell walls |
 | `board_standoff_height` | 3 mm | Height of circuit board above lower panel |
-| `piezo_hole_d` | 1.5 mm | Diameter of piezo wire pass-through holes |
+| `piezo_hole_d` | 3.5 mm | Diameter of piezo wire pass-through holes |
 | `lid_thickness` | 3 mm | Thickness of lower panel |
 | `board_fastener_type` | "hex_nut" | Fastening style: "hex_nut", "square_nut", "self_tap" |
 | `nut_pocket_depth` | 2.4 mm | Depth of hex-nut recess (tune per nut size) |
-| `screw_margin` | 5 mm | Distance from corner to standoff center |
+| `screw_margin` | 13 mm | Distance from corner to standoff center |
 | `include_edge_guides` | true | Add shallow edge guides for panel alignment |
+| `include_switch` | true | Add M16x2 threaded barrel power switch pocket |
+| `switch_d` | 14.5 mm | Hole diameter for M16x2 switch (slight clearance) |
 
 ### Assembly
 
@@ -94,6 +98,17 @@ In the OpenSCAD Customizer:
 5. Insert M3 machine screws from the top and tighten into the nut pockets
 6. Route piezo wires from the barres through the floor holes to your circuit board
 7. Solder or connect piezo leads to your circuit board
+
+### Power Switch (Enclosure Mode)
+
+If `include_switch = true`, the upper shell includes a power switch pocket on the front-left face at mid-height for ergonomic thumb access.
+
+**Switch type:** M16x2 threaded barrel (same mounting style as the Thonkiconn jacks)
+- Hole diameter: 14.5 mm (for M16x2 clearance)
+- Thread the switch barrel through the hole from the front
+- Secure with M16x2 hex nut on the inside
+- Route the switch leads down to your circuit board (e.g., between power supply and main microcontroller rail)
+- Recommended switches: Latching toggle, pushbutton, or rotary switches with M16x2 threads (widely available in Eurorack supply shops)
 
 ### Backward Compatibility
 
