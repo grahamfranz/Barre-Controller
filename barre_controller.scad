@@ -264,6 +264,16 @@ module barre_for_print() {
             barre();
 }
 
+// Shell flipped into print orientation (flat top face on bed, open end facing up).
+// Standoffs print as pillars; screw/piezo holes open cleanly from the bed.
+// The rail ridge on the outer top face is the lowest point (Z=0); the surrounding
+// plate is rail_height above the bed — slicer may add a thin support strip there.
+module upper_shell_for_print() {
+    translate([0, base_outer_y, base_thickness + rail_height])
+        rotate([180, 0, 0])
+            upper_shell();
+}
+
 // ============================================================
 //  Upper Shell (enclosure mode: barre housing with walls)
 // ============================================================
@@ -460,12 +470,14 @@ module show_assembled() {
 
 if (with_enclosure) {
     // Enclosure modes
-    if      (part == "enclosure_shell") upper_shell();
+    if      (part == "enclosure_shell") upper_shell_for_print();
     else if (part == "enclosure_panel") lower_panel();
     else if (part == "enclosure_both") {
-        // Both parts positioned for printing
-        upper_shell();
-        translate([base_outer_x + 5, 0, 0]) lower_panel();
+        // Both parts in print orientation side by side at Z=0
+        // Shell: top face on bed, open end up
+        // Panel: flat base on bed (needs +enclosure_height to cancel internal offset)
+        upper_shell_for_print();
+        translate([base_outer_x + 5, 0, enclosure_height]) lower_panel();
     }
     else if (part == "enclosure_assembled") {
         // Assembled view: lower panel at bottom, upper shell, barres on top
