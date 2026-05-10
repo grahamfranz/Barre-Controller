@@ -87,8 +87,8 @@ enclosure_height = 15;   // Height of upper shell walls (mm)
 rim_height = 7;          // Height of lower panel rim (mm)
 board_standoff_height = 3;  // Height of circuit board above lower panel (mm)
 piezo_hole_d = 3.5;      // Diameter of piezo wire pass-through holes (mm)
-lid_thickness = 3;       // Thickness of lower panel (mm)
-board_fastener_type = "hex_nut";  // [hex_nut, square_nut, self_tap]
+lid_thickness = 1.5;     // Thickness of lower panel base plate (mm); keep >=3 if using hex_nut fasteners
+board_fastener_type = "self_tap";  // [hex_nut, square_nut, self_tap] — self_tap allows thinner lid; hex_nut requires lid>=3mm
 nut_pocket_depth = 2.4;  // Depth of hex-nut recess (mm)
 screw_margin = 13;       // Distance from corner to screw center (mm), positions screws in corners
 include_edge_guides = true;  // Add optional edge guides on lower panel
@@ -161,10 +161,10 @@ piezo_hole_positions = [for (i = [0 : num_barres - 1])
     [barre_x_start() + jack_pocket_x_center, barre_y_center(i)]
 ];
 
-// Power switch position: front-left area, vertically centered in the wall
-switch_x = base_outer_x / 4;  // Left-center area
-switch_y = 0;  // Front face (will be on the wall)
-switch_z = -enclosure_height / 2;  // True center of wall height
+// Power switch position: front-left area, centered in the clear wall above the base plate
+switch_x = base_outer_x / 4;
+switch_y = 0;
+switch_z = -(enclosure_height - lid_thickness) / 2;  // Center of wall between base plate top and ceiling
 
 echo(str("Base: ", base_outer_x, " x ", base_outer_y,
          " x ", base_thickness + rail_height, " mm"));
