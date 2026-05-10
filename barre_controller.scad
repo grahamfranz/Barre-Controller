@@ -94,8 +94,8 @@ screw_margin = 13;       // Distance from corner to screw center (mm), positions
 include_edge_guides = true;  // Add optional edge guides on lower panel
 
 /* [Enclosure — Power Switch] */
-include_switch = true;   // Add M16x2 threaded barrel power switch pocket
-switch_d = 14.5;         // Hole diameter for M16x2 threaded barrel switch (slight clearance)
+include_switch = true;   // Add panel-mount power switch pocket
+switch_d = 12.2;         // Hole diameter for 12 mm illuminated latching push button (slight clearance)
 
 $fn = 48;
 EPS = 0.02;
@@ -161,11 +161,10 @@ piezo_hole_positions = [for (i = [0 : num_barres - 1])
     [barre_x_start() + jack_pocket_x_center, barre_y_center(i)]
 ];
 
-// Power switch position: front-left edge (Y-min side) at mid-height for ergonomic thumb access
-// Positioned ~15mm from the left corner, at height that reaches above the rim
+// Power switch position: front-left area, vertically centered in the wall
 switch_x = base_outer_x / 4;  // Left-center area
 switch_y = 0;  // Front face (will be on the wall)
-switch_z = -enclosure_height / 2 + rim_height / 2;  // Mid-height of wall
+switch_z = -enclosure_height / 2;  // True center of wall height
 
 echo(str("Base: ", base_outer_x, " x ", base_outer_y,
          " x ", base_thickness + rail_height, " mm"));
