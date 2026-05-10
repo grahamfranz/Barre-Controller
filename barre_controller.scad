@@ -84,7 +84,7 @@ foot_d = 14;  // Diameter of feet (for experimental base support)
 /* [Enclosure] */
 with_enclosure = false;  // Enable two-part enclosure mode
 enclosure_height = 15;   // Height of upper shell walls (mm)
-rim_height = 7;          // Height of lower panel rim (mm)
+rim_height = 4;          // Height of lower panel rim (mm); 4 mm is enough for lateral location
 board_standoff_height = 3;  // Height of circuit board above lower panel (mm)
 piezo_hole_d = 3.5;      // Diameter of piezo wire pass-through holes (mm)
 lid_thickness = 1.5;     // Thickness of lower panel base plate (mm); keep >=3 if using hex_nut fasteners
@@ -410,12 +410,16 @@ module lower_panel() {
         // If self_tap, no pockets needed
 
         // --- Switch body clearance through locating rim ---
-        // The rim front face sits 0.3 mm behind the shell wall; without this cutout
-        // it blocks the switch body from seating in the hole.
+        // Remove the rim in the switch zone at the front only — the body passes
+        // over the absent section rather than through a full-length tunnel.
         if (include_switch) {
-            translate([switch_x, plug_y_offset - EPS, switch_z + enclosure_height])
-                rotate([-90, 0, 0])
-                    cylinder(d = switch_d + 1.0, h = plug_depth + 2 * EPS, $fn = 32);
+            switch_body_depth = 25;  // mm — typical panel-mount switch body depth
+            translate([switch_x - (switch_d + 1.0) / 2,
+                       plug_y_offset - EPS,
+                       lid_thickness - EPS])
+                cube([switch_d + 1.0,
+                      switch_body_depth,
+                      rim_height + 2 * EPS]);
         }
     }
 }
