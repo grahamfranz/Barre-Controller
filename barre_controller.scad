@@ -76,6 +76,8 @@ base_thickness = 4;
 base_corner_r  = 3;
 rail_width = 4;
 rail_height = 3;
+screw_head_d = 6.5;      // M3 screw head diameter
+screw_head_depth = 2.0;  // Depth to recess screw head flush
 
 /* [Feet] */
 include_feet = false;  // Feet don't prevent base deflection; users can add rubber pads instead
@@ -214,10 +216,15 @@ module barre() {
         }
 
         // --- Screw through-holes (vertical) ---
-        for (sx = [near_screw_x, far_screw_x])
+        for (sx = [near_screw_x, far_screw_x]) {
             translate([sx, barre_width / 2, -EPS])
                 cylinder(d = screw_clearance_d,
                          h = barre_height + 2 * EPS);
+            // Countersink for screw head on underside
+            translate([sx, barre_width / 2, -EPS])
+                cylinder(d = screw_head_d,
+                         h = screw_head_depth + EPS);
+        }
 
         // --- Piezo indent on bottom of middle ---
         translate([barre_length / 2, barre_width / 2,
@@ -306,10 +313,15 @@ module upper_shell() {
         for (i = [0 : num_barres - 1]) {
             x0 = barre_x_start();
             yc = barre_y_center(i);
-            for (sx = [near_screw_x, far_screw_x])
+            for (sx = [near_screw_x, far_screw_x]) {
                 translate([x0 + sx, yc, -enclosure_height - EPS])
                     cylinder(d = screw_clearance_d,
                              h = enclosure_height + top_thickness + 2 * EPS);
+                // Countersink for screw head on underside (inside)
+                translate([x0 + sx, yc, -enclosure_height - EPS])
+                    cylinder(d = screw_head_d,
+                             h = screw_head_depth + EPS);
+            }
         }
 
         // --- Corner screw holes (M3 for connecting upper shell to lower panel) ---
@@ -317,6 +329,9 @@ module upper_shell() {
             // M3 clearance hole through full top thickness
             translate([pos[0], pos[1], -EPS])
                 cylinder(d = 3.4, h = top_thickness + 2 * EPS, $fn = 16);
+            // Countersink for M3 screw head on underside (inside)
+            translate([pos[0], pos[1], -EPS])
+                cylinder(d = 5.5, h = 1.5 + EPS, $fn = 16);
         }
 
         // --- Hollow interior of standoff tubes (for screw pass-through) - goes full height ---
@@ -392,6 +407,9 @@ module lower_panel() {
         for (pos = boss_corner_positions) {
             translate([pos[0], pos[1], -EPS])
                 cylinder(d = 3.0, h = total_panel_height + standoff_height + 2 * EPS, $fn = 16);
+            // Countersink for M3 screw head on underside (bottom face)
+            translate([pos[0], pos[1], -EPS])
+                cylinder(d = 5.5, h = 1.5 + EPS, $fn = 16);
         }
 
         // --- Hex-nut pockets (recessed into underside of base plate) ---
@@ -442,10 +460,15 @@ module base() {
         for (i = [0 : num_barres - 1]) {
             x0 = barre_x_start();
             yc = barre_y_center(i);
-            for (sx = [near_screw_x, far_screw_x])
+            for (sx = [near_screw_x, far_screw_x]) {
                 translate([x0 + sx, yc, -EPS])
                     cylinder(d = screw_clearance_d,
                              h = base_thickness + 2 * EPS);
+                // Countersink for screw head on underside
+                translate([x0 + sx, yc, -EPS])
+                    cylinder(d = screw_head_d,
+                             h = screw_head_depth + EPS);
+            }
         }
     }
 
