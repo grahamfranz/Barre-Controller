@@ -23,11 +23,32 @@ Each barre consists of three sections:
 - Near screw: through the near end block
 - Far screw: through the far end block, in front of the jack pocket
 
+#### Hardware (per barre: 2 screws)
+- **Screws:** M3, inserted from the top (head sits proud on the end blocks, clear of the flex pad). The total clamp stack is 18 mm (14 mm barre + 4 mm base), so a screw with ~21 mm of thread is ideal — use **M3×25 cut/filed to ~21 mm**, or an M3×20 if you accept partial nut engagement. Brass cuts cleanly.
+- **Nuts:** M3 hex nuts drop into the recessed **hex nut traps** on the base underside — they seat flat-to-flat and won't spin, so you can tighten entirely from the top. Because the barres see repeated pressing (cyclic load), use **nyloc nuts or a dab of threadlocker** so they don't back off. A nyloc sits slightly proud of the base underside; the rubber feet noted below absorb that.
+
 ### Printing
 - **Base**: Print flat on bed (rail ridge points up)
 - **Barre**: Print upside down so cutouts open upward during printing
   - Piezo indent, wire channel, jack pocket, and notch all print cleanly
   - Small bridge under jack pocket is FDM-friendly
+
+#### Plate size and per-part STLs
+
+The `both` render lays the base and all four barres out side-by-side, which spans
+~245 mm in X — wider than most build plates. For smaller plates, print the parts
+separately using the per-part STLs in `Renders/`:
+
+| File | Part | Footprint | Notes |
+|------|------|-----------|-------|
+| `barre_controller_base.stl` | Base (1×) | 130 × 157 × 7 mm | Print flat, rail up |
+| `barre_controller_barre.stl` | Barre (print `num_barres`×) | 110 × 28 × 14 mm | Already in print orientation; duplicate in your slicer |
+| `barre_controller_both.stl` | Base + 4 barres together | 245 × 157 mm | Single-plate layout (large plates only) |
+| `barre_controller_assembled.stl` | Assembled preview | — | Visualization only, not printable as one piece |
+
+For the default 4-barre array, print `barre_controller_base.stl` once and
+`barre_controller_barre.stl` four times (arrange ~31 mm apart in Y, matching the
+`both` layout). To regenerate any STL: `openscad -o Renders/barre_controller_<part>.stl -D 'part="<part>"' barre_controller.scad`
 
 ## File Structure
 
@@ -42,7 +63,7 @@ Key parameters in `barre_controller.scad`:
 | `num_barres` | 4 | Number of barres in the array |
 | `barre_pitch` | 37 mm | Center-to-center spacing between barres |
 | `barre_length` | 110 mm | Total length of each barre |
-| `middle_thickness` | 4 mm | Flex section thickness (smaller = more flex) |
+| `middle_thickness` | 5 mm | Flex section thickness (smaller = more flex; stiffness ~ thickness³) |
 | `jack_offset_from_end` | 14 mm | Distance from far end to jack pocket center |
 | `include_feet` | false | Enable corner feet for base support (experimental) |
 | `foot_d` | 14 mm | Diameter of corner feet (tunable when enabled) |
