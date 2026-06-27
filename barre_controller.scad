@@ -50,7 +50,7 @@ barre_pitch = 37;   // Y centre-to-centre; must be >= barre_width
 barre_length  = 110;
 barre_width   = 28;
 barre_height  = 14;
-middle_thickness = 4;  // pressing surface thickness; thinner = more flex
+middle_thickness = 5;  // pressing surface thickness; thinner = more flex (stiffness ~ thickness^3)
 screw_clearance_d = 3.4;
 notch_offset_from_middle = 4;
 
@@ -78,6 +78,9 @@ rail_width = 4;
 rail_height = 3;
 screw_head_d = 6.5;      // M3 screw head diameter
 screw_head_depth = 2.0;  // Depth to recess screw head flush
+nut_trap_af    = 5.5;    // M3 hex nut across-flats (wrench size)
+nut_trap_depth = 2.6;    // Hex nut pocket depth on base underside (M3 nut ~2.4mm + clearance)
+nut_trap_d     = nut_trap_af / cos(30) + 0.2;  // across-corners + clearance for $fn=6 pocket
 
 /* [Feet] */
 include_feet = false;  // Feet don't prevent base deflection; users can add rubber pads instead
@@ -464,10 +467,10 @@ module base() {
                 translate([x0 + sx, yc, -EPS])
                     cylinder(d = screw_clearance_d,
                              h = base_thickness + 2 * EPS);
-                // Countersink for screw head on underside
+                // Hex nut trap on underside (nut seats here, can't spin)
                 translate([x0 + sx, yc, -EPS])
-                    cylinder(d = screw_head_d,
-                             h = screw_head_depth + EPS);
+                    cylinder(d = nut_trap_d,
+                             h = nut_trap_depth + EPS, $fn = 6);
             }
         }
     }
