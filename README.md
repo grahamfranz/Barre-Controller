@@ -6,14 +6,14 @@ A parametric Eurorack-style control interface with flexible barres and top-mount
 
 The Barre Controller features:
 - **Leaf-spring flex barres**: Flexible middle sections with piezo sensors for dynamic control
-- **Thonk jacks**: Top-mounted 3.5 mm panel jacks (PJ398SM/Thonkiconn) for Eurorack patching
+- **3.5 mm jacks**: Top-mounted panel jacks with a ~6 mm threaded barrel — any standard 3.5 mm panel-mount jack works (e.g. PJ398SM / "Thonkiconn")
 - **Modular array**: Configurable number of barres with adjustable pitch
 
 ## Design Details
 
 ### Barre Architecture
 Each barre consists of three sections:
-- **Near end block**: Houses the first mounting screw and piezo sensor
+- **Near end block**: Houses the near mounting screw
 - **Middle (flex section)**: Thin, flexible member that bows when pressed, with piezo contact on the underside
 - **Far end block**: Houses the jack pocket and far screw, with wire routing to the piezo
 
@@ -24,7 +24,7 @@ Each barre consists of three sections:
 - Far screw: through the far end block, in front of the jack pocket
 
 #### Hardware (per barre: 2 screws)
-- **Screws:** M3, inserted from the top (head sits proud on the end blocks, clear of the flex pad). The total clamp stack is 18 mm (14 mm barre + 4 mm base), so a screw with ~21 mm of thread is ideal — use **M3×25 cut/filed to ~21 mm**, or an M3×20 if you accept partial nut engagement. Brass cuts cleanly.
+- **Screws:** M3, inserted from the top; the head sits proud on the end blocks (clear of the flex pad). The clamp stack is 18 mm (14 mm barre + 4 mm base), but the hex nut traps recess the nut up into the base underside, so a standard **M3×20** reaches full nut engagement with a couple of mm to spare — **no filing or cutting needed**. (No top counterbore: at the far screw a recessed head would break through the thin jack shoulder into the jack pocket.)
 - **Nuts:** M3 hex nuts drop into the recessed **hex nut traps** on the base underside — they seat flat-to-flat and won't spin, so you can tighten entirely from the top. Because the barres see repeated pressing (cyclic load), use **nyloc nuts or a dab of threadlocker** so they don't back off. A nyloc sits slightly proud of the base underside; the rubber feet noted below absorb that.
 
 ### Printing
@@ -74,7 +74,7 @@ Key parameters in `barre_controller.scad`:
 - Print orientation: See "Printing" section above
 - **Base deflection:** The corner feet feature is disabled by default (`include_feet = false`) because small feet don't effectively prevent base flex when pressing the barres. If experimenting with feet, increase `foot_d` to larger values (e.g., 18–20 mm) for more rigidity. Alternatively, add adhesive rubber pads (~12 mm diameter) to the underside corners or increase `base_thickness` parametrically
 - Piezo sensors are glued to the bottom of each middle section
-- Thonk jack bodies mount from below through the pocket opening
+- Jack bodies mount from below through the pocket opening; the threaded barrel passes up through the top shoulder and is secured with the jack's own nut on top
 - Wire routing connects jack terminals to piezo sensor
 
 ## License

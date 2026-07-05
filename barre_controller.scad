@@ -1,30 +1,25 @@
 /* ============================================================
  *  Parametric Barre Controller v4
  *  ------------------------------------------------------------
- *  Leaf-spring flex-beam barres with side-mounted 3.5 mm jacks
- *  (sized for Thonk PJ398SM / Thonkiconn) for Eurorack-style
- *  patching.
+ *  Leaf-spring flex-beam barres with top-mounted 3.5 mm jacks
+ *  (sized for a standard PJ398SM / "Thonkiconn" panel jack, but
+ *  any 3.5 mm panel jack with a ~6 mm threaded barrel fits) for
+ *  Eurorack-style patching.
  *
  *  A single continuous rail runs across the base. Each barre
  *  has a matching notch on the underside of its far end block
  *  that drops over the rail, providing lateral alignment. Two
  *  screws per barre clamp it down.
  *
- *  === Barre side profile (along X) ===
+ *  Each barre has three sections along X: a near end block
+ *  (near clamp screw), a thin middle flex section (piezo glued
+ *  to its underside), and a far end block (jack pocket + far
+ *  clamp screw + rail notch).
  *
- *   Z=barre_height ┬───────────────┬──────────────┬──────────┐
- *                   │ near          │              │ jack     │
- *                   │ end  ┌────────┴──────────┐   │ block    │─┤← plug (Y=0)
- *                   │ block│ middle flex (thin)│   │ [hollow] │
- *                   │      └───────────────────┘   │ back open│
- *                   │  ↑screw   ↑piezo             │ ↑screw   │
- *   Z=0  ───────────┴──────────────────┬──┬─────────┴──────────┘
- *                                      notch└─ rail on base
- *
- *  Jack orientation: plug faces the user (Y=0 face). The body
- *  sits in a hollow cavity open at the back face (Y=barre_width),
- *  giving access to the solder lugs and cable routing.
- *  The far screw clamps in front of (+X of) the jack.
+ *  Jack orientation: the plug inserts from the top face; the
+ *  jack body sits in a pocket open at the bottom face, giving
+ *  access to the solder lugs and cable routing. The far screw
+ *  clamps just in front of (+X of) the jack.
  *
  *  The middle's bottom sits (barre_height - middle_thickness)
  *  above the base, giving a natural flex gap so the middle can
@@ -59,8 +54,9 @@ piezo_d = 27;
 piezo_indent_clearance = 0.4;
 piezo_indent_depth = 0.8;
 
-/* [Thonk Jack — 3.5 mm TS, top-mounted] */
-// Sized for PJ398SM ("Thonkiconn") panel jack. Plug inserts from above.
+/* [3.5 mm Jack — TS, top-mounted] */
+// Sized for a PJ398SM ("Thonkiconn") panel jack, but any standard 3.5 mm
+// panel jack with a ~6 mm threaded barrel fits. Plug inserts from above.
 jack_plug_hole_d     = 6.2;   // for 6 mm threaded barrel
 jack_plug_hole_wall  = 2.0;   // top shoulder (where the nut clamps)
 jack_pocket_d        = 10;    // body pocket diameter (~9 mm body + clearance)
@@ -219,14 +215,15 @@ module barre() {
         }
 
         // --- Screw through-holes (vertical) ---
+        // No head recess: the screw head sits proud on the end blocks (clear of
+        // the flex pad). A standard M3x20 still reaches full nut engagement in
+        // the base's underside nut traps, so no filing is needed. A top
+        // counterbore is deliberately avoided at the far screw — its 6.5 mm head
+        // would breach the thin (2 mm) jack shoulder into the jack cavity.
         for (sx = [near_screw_x, far_screw_x]) {
             translate([sx, barre_width / 2, -EPS])
                 cylinder(d = screw_clearance_d,
                          h = barre_height + 2 * EPS);
-            // Countersink for screw head on underside
-            translate([sx, barre_width / 2, -EPS])
-                cylinder(d = screw_head_d,
-                         h = screw_head_depth + EPS);
         }
 
         // --- Piezo indent on bottom of middle ---
