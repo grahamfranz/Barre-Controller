@@ -88,8 +88,8 @@ enclosure_height = 15;   // Height of upper shell walls (mm)
 rim_height = 4;          // Height of lower panel rim (mm); 4 mm is enough for lateral location
 board_standoff_height = 3;  // Height of circuit board above lower panel (mm)
 piezo_hole_d = 3.5;      // Diameter of piezo wire pass-through holes (mm)
-lid_thickness = 1.5;     // Thickness of lower panel base plate (mm); keep >=3 if using hex_nut fasteners
-board_fastener_type = "self_tap";  // [hex_nut, square_nut, self_tap] — self_tap allows thinner lid; hex_nut requires lid>=3mm
+lid_thickness = 3;       // Thickness of lower panel base plate (mm); >=3 needed for hex_nut fasteners
+board_fastener_type = "hex_nut";  // [hex_nut, square_nut, self_tap] — hex_nut = captive nut (durable, needs lid>=3mm); self_tap allows a thinner lid
 nut_pocket_depth = 2.4;  // Depth of hex-nut recess (mm)
 screw_margin = 13;       // Distance from corner to screw center (mm), positions screws in corners
 include_edge_guides = true;  // Add optional edge guides on lower panel
