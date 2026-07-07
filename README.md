@@ -24,7 +24,7 @@ Each barre consists of three sections:
 - Far screw: through the far end block, in front of the jack pocket
 
 #### Hardware (per barre: 2 screws)
-- **Screws:** M3, inserted from the top; the head sits proud on the end blocks (clear of the flex pad). The clamp stack is 18 mm (14 mm barre + 4 mm base), but the hex nut traps recess the nut up into the base underside, so a standard **M3×20** reaches full nut engagement with a couple of mm to spare — **no filing or cutting needed**. (No top counterbore: at the far screw a recessed head would break through the thin jack shoulder into the jack pocket.)
+- **Screws:** M3, inserted from the top; the head sits proud on the end blocks (clear of the flex pad). The clamp stack is 20 mm (14 mm barre + 6 mm base), so a standard **M3×20** seats flush — the tip lands right at the base underside with full nut engagement, no protrusion and **no filing or cutting needed**. (No top counterbore: at the far screw a recessed head would break through the thin jack shoulder into the jack pocket.)
 - **Nuts:** M3 hex nuts drop into the recessed **hex nut traps** on the base underside — they seat flat-to-flat and won't spin, so you can tighten entirely from the top. Because the barres see repeated pressing (cyclic load), use **nyloc nuts or a dab of threadlocker** so they don't back off. A nyloc sits slightly proud of the base underside; the rubber feet noted below absorb that.
 
 ### Printing
@@ -41,7 +41,7 @@ separately using the per-part STLs in `Renders/`:
 
 | File | Part | Footprint | Notes |
 |------|------|-----------|-------|
-| `barre_controller_base.stl` | Base (1×) | 130 × 157 × 7 mm | Print flat, rail up |
+| `barre_controller_base.stl` | Base (1×) | 130 × 157 × 9 mm | Print flat, rail up |
 | `barre_controller_barre.stl` | Barre (print `num_barres`×) | 110 × 28 × 14 mm | Already in print orientation; duplicate in your slicer |
 | `barre_controller_both.stl` | Base + 4 barres together | 245 × 157 mm | Single-plate layout (large plates only) |
 | `barre_controller_assembled.stl` | Assembled preview | — | Visualization only, not printable as one piece |
@@ -72,7 +72,7 @@ Key parameters in `barre_controller.scad`:
 
 - Material: PLA or similar suitable for FDM printing
 - Print orientation: See "Printing" section above
-- **Base deflection:** The corner feet feature is disabled by default (`include_feet = false`) because small feet don't effectively prevent base flex when pressing the barres. If experimenting with feet, increase `foot_d` to larger values (e.g., 18–20 mm) for more rigidity. Alternatively, add adhesive rubber pads (~12 mm diameter) to the underside corners or increase `base_thickness` parametrically
+- **Base deflection:** The base is 6 mm thick by default, which resists press deflection reasonably well (and sets the 20 mm clamp stack for a flush M3×20). The corner feet feature is disabled by default (`include_feet = false`) because small feet don't effectively prevent base flex. If you still see flex, increase `base_thickness` in 5 mm steps to keep a standard screw flush (6 mm → M3×20, 11 mm → M3×25, 16 mm → M3×30), add adhesive rubber pads (~12 mm diameter) to the underside corners, or experiment with feet at larger `foot_d` (e.g. 18–20 mm)
 - Piezo sensors are glued to the bottom of each middle section
 - Jack bodies mount from below through the pocket opening; the threaded barrel passes up through the top shoulder and is secured with the jack's own nut on top
 - Wire routing connects jack terminals to piezo sensor

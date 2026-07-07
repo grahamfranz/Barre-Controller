@@ -68,7 +68,7 @@ wire_channel_d = 2;
 /* [Base] */
 base_margin_x  = 10;
 base_margin_y  = 9;
-base_thickness = 4;
+base_thickness = 6;   // 14 mm barre + 6 mm base = 20 mm stack, so a standard M3x20 seats flush (tip at the underside) with full nut engagement; also stiffens the base against press deflection
 base_corner_r  = 3;
 rail_width = 4;
 rail_height = 3;
