@@ -128,7 +128,7 @@ cavity_x_span        = jack_pocket_d + 6;  // expanded for better wiring room
 cavity_x_min         = jack_pocket_x_center - cavity_x_span / 2;
 
 near_screw_x     = end_length_near / 2;
-far_screw_x      = barre_length - 5;  // moved to far end, 5mm from end
+far_screw_x      = barre_length - 4;  // near the end face; kept clear of the jack cavity (see assert below)
 
 array_span_y     = (num_barres - 1) * barre_pitch + barre_width;
 base_outer_x     = 2 * base_margin_x + barre_length;
@@ -186,6 +186,23 @@ if (with_enclosure) {
     echo(str("Piezo Holes: ", len(piezo_hole_positions), " holes, diameter ",
              piezo_hole_d, " mm"));
 }
+
+// ============================================================
+//  Design-rule asserts (fail loudly on clashing parameter combos)
+// ============================================================
+
+// Far clamp screw must not cut into the jack cavity: the near edge of its
+// clearance hole has to stay outboard of the cavity's far wall.
+assert(far_screw_x - screw_clearance_d / 2 >= cavity_x_min + cavity_x_span,
+       "far_screw_x too small: its clearance hole clips the jack cavity. Increase far_screw_x, shrink cavity_x_span, or move the jack (jack_offset_from_end).");
+
+// Barres must not overlap laterally.
+assert(barre_pitch >= barre_width,
+       "barre_pitch must be >= barre_width, or adjacent barres overlap.");
+
+// Hex-nut traps need enough lid under them to leave a floor.
+assert(board_fastener_type != "hex_nut" || lid_thickness >= nut_pocket_depth + 0.4,
+       "hex_nut fasteners need lid_thickness >= nut_pocket_depth + ~0.4 mm floor. Thicken lid_thickness or switch board_fastener_type to self_tap.");
 
 // ============================================================
 //  Helpers
